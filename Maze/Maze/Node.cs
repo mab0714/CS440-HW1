@@ -9,15 +9,21 @@ namespace Maze
 {
     public class Node : IEquatable<Node>
     {
+        // Node location
         private int _x;
         private int _y;
-        private char _val;
-        private int _h;
-        private int _g;
-        private int _f;
-        private Node _parentNode;
-        private List<Node> _childNodes;
-        private Node _goalStateNode;
+
+        // Unused
+        //private char _val;
+
+        // Cost variables
+        private int _h;  // cost to get to goal
+        private int _g;  // cost to get to location
+        private int _f;  // total cost (f+g)
+
+        private Node _parentNode;  // reference to parent node
+        private List<Node> _childNodes; // list of child nodes
+        private Node _goalStateNode; 
 
         public bool _isInitialized;
 
@@ -127,18 +133,18 @@ namespace Maze
 
             
 
-            // See NE
-            tmpNode = new Node(this._x + 1, this._y - 1, this);
-            if (isWalkable(this._x + 1, this._y - 1, mazeBoard) && 
-                //(((this._parentNode != null && !(this._parentNode._x != this.x + 1 || this._parentNode._y != this._y - 1)) || this._parentNode == null)) && 
-                !otherChildNodes.Contains(tmpNode))
-            {
-                //tmpNode.g = tmpNode.parentNode.g + 14;
-                //tmpNode.h = calcManhattanDistance(this._x+1, this.y-1);
-                //tmpNode.f = tmpNode.g + tmpNode.h;
-                //tmpNode.goalStateNode = this.goalStateNode;
-                AddChild(tmpNode);
-            }
+            //// See NE
+            //tmpNode = new Node(this._x + 1, this._y - 1, this);
+            //if (isWalkable(this._x + 1, this._y - 1, mazeBoard) && 
+            //    //(((this._parentNode != null && !(this._parentNode._x != this.x + 1 || this._parentNode._y != this._y - 1)) || this._parentNode == null)) && 
+            //    !otherChildNodes.Contains(tmpNode))
+            //{
+            //    //tmpNode.g = tmpNode.parentNode.g + 14;
+            //    //tmpNode.h = calcManhattanDistance(this._x+1, this.y-1);
+            //    //tmpNode.f = tmpNode.g + tmpNode.h;
+            //    //tmpNode.goalStateNode = this.goalStateNode;
+            //    AddChild(tmpNode);
+            //}
             
             // See E
             tmpNode = new Node(this._x + 1, this._y, this);
@@ -153,18 +159,18 @@ namespace Maze
                 AddChild(tmpNode);
             }
 
-            // See SE
-            tmpNode = new Node(this._x + 1, this._y + 1, this);
-            if (isWalkable(this._x + 1, this._y + 1, mazeBoard) && 
-                //(((this._parentNode != null && !(this._parentNode._x != this.x + 1 || this._parentNode._y != this._y + 1)) || this._parentNode == null)) && 
-                !otherChildNodes.Contains(tmpNode))
-            {
-                //tmpNode.g = tmpNode.parentNode.g + 14;
-                //tmpNode.h = calcManhattanDistance(this._x+1, this._y+1);
-                //tmpNode.f = tmpNode.g + tmpNode.h;
-                //tmpNode.goalStateNode = this.goalStateNode;
-                AddChild(tmpNode);
-            }
+            //// See SE
+            //tmpNode = new Node(this._x + 1, this._y + 1, this);
+            //if (isWalkable(this._x + 1, this._y + 1, mazeBoard) && 
+            //    //(((this._parentNode != null && !(this._parentNode._x != this.x + 1 || this._parentNode._y != this._y + 1)) || this._parentNode == null)) && 
+            //    !otherChildNodes.Contains(tmpNode))
+            //{
+            //    //tmpNode.g = tmpNode.parentNode.g + 14;
+            //    //tmpNode.h = calcManhattanDistance(this._x+1, this._y+1);
+            //    //tmpNode.f = tmpNode.g + tmpNode.h;
+            //    //tmpNode.goalStateNode = this.goalStateNode;
+            //    AddChild(tmpNode);
+            //}
 
             // See S
             tmpNode = new Node(this._x, this._y + 1, this);
@@ -179,18 +185,18 @@ namespace Maze
                 AddChild(tmpNode);
             }
 
-            // See SW
-            tmpNode = new Node(this._x - 1, this._y + 1, this);
-            if (isWalkable(this._x - 1, this._y + 1, mazeBoard) && 
-                //(((this._parentNode != null && !(this._parentNode._x != this.x - 1 || this._parentNode._y != this._y + 1)) || this._parentNode == null)) && 
-                !otherChildNodes.Contains(tmpNode))
-            {
-                //tmpNode.g = tmpNode.parentNode.g + 14;
-                //tmpNode.h = calcManhattanDistance(this._x-1, this.y+1);
-                //tmpNode.f = tmpNode.g + tmpNode.h;
-                //tmpNode.goalStateNode = this.goalStateNode;
-                AddChild(tmpNode);
-            }
+            //// See SW
+            //tmpNode = new Node(this._x - 1, this._y + 1, this);
+            //if (isWalkable(this._x - 1, this._y + 1, mazeBoard) && 
+            //    //(((this._parentNode != null && !(this._parentNode._x != this.x - 1 || this._parentNode._y != this._y + 1)) || this._parentNode == null)) && 
+            //    !otherChildNodes.Contains(tmpNode))
+            //{
+            //    //tmpNode.g = tmpNode.parentNode.g + 14;
+            //    //tmpNode.h = calcManhattanDistance(this._x-1, this.y+1);
+            //    //tmpNode.f = tmpNode.g + tmpNode.h;
+            //    //tmpNode.goalStateNode = this.goalStateNode;
+            //    AddChild(tmpNode);
+            //}
 
             // See W
             tmpNode = new Node(this._x - 1, this._y, this);
@@ -205,18 +211,19 @@ namespace Maze
                 AddChild(tmpNode);
             }
 
-            // See NW
-            tmpNode = new Node(this._x - 1, this._y - 1, this);
-            if (isWalkable(this._x - 1, this._y - 1, mazeBoard) && 
-                //(((this._parentNode != null && !(this._parentNode._x != this.x - 1 || this._parentNode._y != this._y - 1)) || this._parentNode == null)) && 
-                !otherChildNodes.Contains(tmpNode))
-            {
-                //tmpNode.g = tmpNode.parentNode.g + 14;
-                //tmpNode.h = calcManhattanDistance(this._x-1, this._y-1);
-                //tmpNode.f = tmpNode.g + tmpNode.h;
-                //tmpNode.goalStateNode = this.goalStateNode;
-                AddChild(tmpNode);
-            }
+            //// See NW
+            //tmpNode = new Node(this._x - 1, this._y - 1, this);
+            //if (isWalkable(this._x - 1, this._y - 1, mazeBoard) && 
+            //    //(((this._parentNode != null && !(this._parentNode._x != this.x - 1 || this._parentNode._y != this._y - 1)) || this._parentNode == null)) && 
+            //    !otherChildNodes.Contains(tmpNode))
+            //{
+            //    //tmpNode.g = tmpNode.parentNode.g + 14;
+            //    //tmpNode.h = calcManhattanDistance(this._x-1, this._y-1);
+            //    //tmpNode.f = tmpNode.g + tmpNode.h;
+            //    //tmpNode.goalStateNode = this.goalStateNode;
+            //    AddChild(tmpNode);
+            //}
+
             if (this._parentNode != null && this._childNodes != null)
             {
                 _childNodes.Remove(this._parentNode);
@@ -240,16 +247,16 @@ namespace Maze
 
 
 
-            // See NE
-            tmpNode = new Node(this._x + 1, this._y - 1, this);
-            if (isWalkable(this._x + 1, this._y - 1, mazeBoard))
-            {
-                tmpNode.g = tmpNode.parentNode.g + 14;
-                tmpNode.h = calcManhattanDistance(this._x + 1, this.y - 1);
-                tmpNode.f = tmpNode.g + tmpNode.h;
-                tmpNode.goalStateNode = this.goalStateNode;
-                AddChild(tmpNode);
-            }
+            //// See NE
+            //tmpNode = new Node(this._x + 1, this._y - 1, this);
+            //if (isWalkable(this._x + 1, this._y - 1, mazeBoard))
+            //{
+            //    tmpNode.g = tmpNode.parentNode.g + 14;
+            //    tmpNode.h = calcManhattanDistance(this._x + 1, this.y - 1);
+            //    tmpNode.f = tmpNode.g + tmpNode.h;
+            //    tmpNode.goalStateNode = this.goalStateNode;
+            //    AddChild(tmpNode);
+            //}
 
             // See E
             tmpNode = new Node(this._x + 1, this._y, this);
@@ -262,16 +269,16 @@ namespace Maze
                 AddChild(tmpNode);
             }
 
-            // See SE
-            tmpNode = new Node(this._x + 1, this._y + 1, this);
-            if (isWalkable(this._x + 1, this._y + 1, mazeBoard))
-            {
-                tmpNode.g = tmpNode.parentNode.g + 14;
-                tmpNode.h = calcManhattanDistance(this._x + 1, this._y + 1);
-                tmpNode.f = tmpNode.g + tmpNode.h;
-                tmpNode.goalStateNode = this.goalStateNode;
-                AddChild(tmpNode);
-            }
+            //// See SE
+            //tmpNode = new Node(this._x + 1, this._y + 1, this);
+            //if (isWalkable(this._x + 1, this._y + 1, mazeBoard))
+            //{
+            //    tmpNode.g = tmpNode.parentNode.g + 14;
+            //    tmpNode.h = calcManhattanDistance(this._x + 1, this._y + 1);
+            //    tmpNode.f = tmpNode.g + tmpNode.h;
+            //    tmpNode.goalStateNode = this.goalStateNode;
+            //    AddChild(tmpNode);
+            //}
 
             // See S
             tmpNode = new Node(this._x, this._y + 1, this);
@@ -284,16 +291,16 @@ namespace Maze
                 AddChild(tmpNode);
             }
 
-            // See SW
-            tmpNode = new Node(this._x - 1, this._y + 1, this);
-            if (isWalkable(this._x - 1, this._y + 1, mazeBoard))
-            {
-                tmpNode.g = tmpNode.parentNode.g + 14;
-                tmpNode.h = calcManhattanDistance(this._x - 1, this.y + 1);
-                tmpNode.f = tmpNode.g + tmpNode.h;
-                tmpNode.goalStateNode = this.goalStateNode;
-                AddChild(tmpNode);
-            }
+            //// See SW
+            //tmpNode = new Node(this._x - 1, this._y + 1, this);
+            //if (isWalkable(this._x - 1, this._y + 1, mazeBoard))
+            //{
+            //    tmpNode.g = tmpNode.parentNode.g + 14;
+            //    tmpNode.h = calcManhattanDistance(this._x - 1, this.y + 1);
+            //    tmpNode.f = tmpNode.g + tmpNode.h;
+            //    tmpNode.goalStateNode = this.goalStateNode;
+            //    AddChild(tmpNode);
+            //}
 
             // See W
             tmpNode = new Node(this._x - 1, this._y, this);
@@ -306,16 +313,16 @@ namespace Maze
                 AddChild(tmpNode);
             }
 
-            // See NW
-            tmpNode = new Node(this._x - 1, this._y - 1, this);
-            if (isWalkable(this._x - 1, this._y - 1, mazeBoard))
-            {
-                tmpNode.g = tmpNode.parentNode.g + 14;
-                tmpNode.h = calcManhattanDistance(this._x - 1, this._y - 1);
-                tmpNode.f = tmpNode.g + tmpNode.h;
-                tmpNode.goalStateNode = this.goalStateNode;
-                AddChild(tmpNode);
-            }
+            //// See NW
+            //tmpNode = new Node(this._x - 1, this._y - 1, this);
+            //if (isWalkable(this._x - 1, this._y - 1, mazeBoard))
+            //{
+            //    tmpNode.g = tmpNode.parentNode.g + 14;
+            //    tmpNode.h = calcManhattanDistance(this._x - 1, this._y - 1);
+            //    tmpNode.f = tmpNode.g + tmpNode.h;
+            //    tmpNode.goalStateNode = this.goalStateNode;
+            //    AddChild(tmpNode);
+            //}
             if (this._parentNode != null && this._childNodes != null)
             {
                 _childNodes.Remove(this._parentNode);

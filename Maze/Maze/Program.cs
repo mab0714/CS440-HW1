@@ -12,7 +12,7 @@ namespace Maze
     {        
         static void Main(string[] args)
         {
-            string mazeData = "I:\\Backup\\Masters\\UIUC\\2016\\Fall\\CS_440\\Homework\\1\\openMaze.txt";
+            string mazeData = "I:\\Backup\\Masters\\UIUC\\2016\\Fall\\CS_440\\Homework\\1\\bigMaze.txt";
             List<List<char>> mazeBoard = new List<List<char>>();
             List<Node> visitedNodes = new List<Node>();
             List<Node> pathToGoalState = new List<Node>();
@@ -86,14 +86,18 @@ namespace Maze
             //found = findBFSPath(currentGeneration, endGoalNode, mazeBoard, visitedNodes, pathToGoalState, otherChildNodes, refreshDelayMS);
 
             // Greedy 
-            //found = findGreedyPath(currentNode, endGoalNode, mazeBoard, visitedNodes, pathToGoalState, rand, otherChildNodes, refreshDelayMS);
+            Node startStateNodeG = new Node(intStartX, intStartY, null, endGoalNode);
+            List<Node> currentGeneration = new List<Node>();
+            currentNode = startStateNodeG;
+            currentGeneration.Add(currentNode);
+            found = findGreedyPath(currentGeneration, endGoalNode, mazeBoard, visitedNodes, pathToGoalState, otherChildNodes, refreshDelayMS);
 
             // A*
-            Node startStateNodeA = new Node(intStartX, intStartY, null, endGoalNode);
-            List<Node> currentGeneration = new List<Node>();
-            currentNode = startStateNodeA;
-            currentGeneration.Add(currentNode);
-            found = findAPath(currentGeneration, endGoalNode, mazeBoard, visitedNodes, pathToGoalState, otherChildNodes, refreshDelayMS);
+            //Node startStateNodeA = new Node(intStartX, intStartY, null, endGoalNode);
+            //List<Node> currentGeneration = new List<Node>();
+            //currentNode = startStateNodeA;
+            //currentGeneration.Add(currentNode);
+            //found = findAPath(currentGeneration, endGoalNode, mazeBoard, visitedNodes, pathToGoalState, otherChildNodes, refreshDelayMS);
 
             //Node n1 = new Node(1, 1, null);
             //n1.f = 192;
@@ -270,7 +274,7 @@ namespace Maze
 
         }
 
-        static bool findGreedyPath(Node currentNode, Node goalStateNode, List<List<char>> mazeBoard, List<Node> visitedNodes, List<Node> finalPathOfNodes, Random rand, List<Node> otherChildNodes, int refreshDelayMS)
+        static bool findInformedDFSPath(Node currentNode, Node goalStateNode, List<List<char>> mazeBoard, List<Node> visitedNodes, List<Node> finalPathOfNodes, Random rand, List<Node> otherChildNodes, int refreshDelayMS)
         {
             // In case of backtracking, no need to add a revisited node 
             // Perhaps a wall was hit, and backtracking is necessary.  No need to add the
@@ -342,7 +346,7 @@ namespace Maze
 
                         //nextNode = currentNode.childNodes[randNumber];
                         nextNode = getClosestNode(currentNode.childNodes, goalStateNode);
-                        if (findGreedyPath(nextNode, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, rand, otherChildNodes, refreshDelayMS))
+                        if (findInformedDFSPath(nextNode, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, rand, otherChildNodes, refreshDelayMS))
                         {
                             return true;
                         }
@@ -354,7 +358,7 @@ namespace Maze
                         if (currentNode.parentNode != null)
                         {
                             nextNode = currentNode.parentNode;
-                            if (findGreedyPath(nextNode, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, rand, otherChildNodes, refreshDelayMS))
+                            if (findInformedDFSPath(nextNode, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, rand, otherChildNodes, refreshDelayMS))
                             {
                                 return true;
                             }
@@ -370,7 +374,7 @@ namespace Maze
                     if (currentNode.parentNode != null)
                     {
                         nextNode = currentNode.parentNode;
-                        if (findGreedyPath(nextNode, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, rand, otherChildNodes, refreshDelayMS))
+                        if (findInformedDFSPath(nextNode, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, rand, otherChildNodes, refreshDelayMS))
                         {
                             return true;
                         }
@@ -384,7 +388,139 @@ namespace Maze
             }
 
             return false;
-            
+
+        }
+        static bool findGreedyPath(List<Node> nextOptions, Node goalStateNode, List<List<char>> mazeBoard, List<Node> visitedNodes, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS)
+        {
+            Node currentNode = new Node(0, 0, null, goalStateNode);
+            Node nextNode = new Node(0, 0, null, goalStateNode);
+            List<Node> sortList = nextOptions.OrderBy(o => o.f).ToList();
+
+            // Get the best option of the nextOptions.
+            // If there is no other options, no solution found.
+            if (sortList[0] != null)
+            {
+                currentNode = sortList[0];
+            }
+            else
+            {
+                return false;
+            }
+
+            // Only difference between Greedy and A is the g component
+            currentNode.g = 0;
+
+            if (!visitedNodes.Contains(currentNode))
+            {
+                visitedNodes.Add(currentNode);
+
+                mazeBoard[currentNode.y][currentNode.x] = 'v';
+                Thread.Sleep(refreshDelayMS);
+                Console.Clear();
+                Display(mazeBoard);
+
+                if (currentNode.Equals(goalStateNode))
+                {
+                    finalPathOfNodes.Clear();
+                    finalPathOfNodes.Add(currentNode);
+                    Node tmpNode = new Node(currentNode.x, currentNode.y, currentNode.parentNode);
+                    while (tmpNode.parentNode != null)
+                    {
+                        mazeBoard[tmpNode.y][tmpNode.x] = '.';
+                        nextNode = tmpNode.parentNode;
+                        finalPathOfNodes.Add(nextNode);
+                        tmpNode = nextNode;
+                    }
+                    mazeBoard[tmpNode.y][tmpNode.x] = 'P';
+                    Thread.Sleep(refreshDelayMS);
+                    Console.Clear();
+                    Display(mazeBoard);
+
+                    return true;
+                }
+                else
+                {
+                    if (currentNode.childNodes == null)
+                    {
+                        currentNode.childNodes = currentNode.findEligibleChildrenA(mazeBoard);
+                    }
+
+                    currentNode.showNodeInfo();
+
+                    if (currentNode.childNodes != null && currentNode.childNodes.Count > 0)
+                    {
+
+                        // Mark childNodes as being already a child to some other parent.
+                        foreach (Node n in currentNode.childNodes)
+                        {
+                            if (!otherChildNodes.Contains(n))
+                            {
+                                otherChildNodes.Add(n);
+                            }
+                            else
+                            {
+                                if (otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).f > n.f)
+                                {
+                                    // Update parentNode, g, h, f 
+                                    otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).parentNode = currentNode;
+                                    otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).f = n.f;
+                                    otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).g = n.g;
+                                    otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).h = n.h;
+                                    // If it's updated, it may need to be revisited.
+                                    if (visitedNodes.Contains(n))
+                                    {
+                                        visitedNodes.Remove(n);
+                                    }
+
+                                }
+                            }
+                        }
+
+                    }
+                    nextOptions.Remove(currentNode);
+
+                    // Remove visited childNodes as repeatable options.
+                    foreach (Node n in visitedNodes)
+                    {
+                        if (otherChildNodes.Contains(n))
+                        {
+                            otherChildNodes.Remove(n);
+                        }
+                    }
+
+                    // Update any recalculated otherChildNodes into the nextOption list.
+                    foreach (Node n in otherChildNodes)
+                    {
+                        if (nextOptions.Contains(n))
+                        {
+                            nextOptions.Remove(n);
+                        }
+
+                        nextOptions.Add(n);
+                    }
+
+
+                    findGreedyPath(nextOptions, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
+
+                }
+
+            }
+            else
+            {
+                nextOptions.Remove(currentNode);
+                if (nextOptions != null)
+                {
+                    sortList = nextOptions.OrderBy(o => o.f).ToList();
+                    findGreedyPath(sortList, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return true;
+
         }
 
         static bool findBFSPath(List<Node> currGen, Node goalStateNode, List<List<char>> mazeBoard, List<Node> visitedNodes, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS)
