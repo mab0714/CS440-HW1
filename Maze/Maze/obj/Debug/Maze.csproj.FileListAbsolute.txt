@@ -10,3 +10,12 @@ C:\Users\Marvo\Desktop\Maze\Maze\bin\Debug\Maze.exe
 C:\Users\Marvo\Desktop\Maze\Maze\bin\Debug\Maze.pdb
 C:\Users\Marvo\Desktop\Maze\Maze\obj\Debug\Maze.csprojResolveAssemblyReference.cache
 I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\Maze\Maze\obj\Debug\Maze.csprojResolveAssemblyReference.cache
+D:\Maze\Greedy\CS440-HW1-Greedy\CS440-HW1-Greedy\Maze\Maze\bin\Debug\Maze.exe.config
+D:\Maze\Greedy\CS440-HW1-Greedy\CS440-HW1-Greedy\Maze\Maze\obj\Debug\Maze.exe
+D:\Maze\Greedy\CS440-HW1-Greedy\CS440-HW1-Greedy\Maze\Maze\obj\Debug\Maze.pdb
+I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\CS440-HW1-Greedy\CS440-HW1-Greedy\Maze\Maze\bin\Debug\Maze.exe.config
+I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\CS440-HW1-Greedy\CS440-HW1-Greedy\Maze\Maze\obj\Debug\Maze.exe
+I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\CS440-HW1-Greedy\CS440-HW1-Greedy\Maze\Maze\obj\Debug\Maze.pdb
+I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\CS440-HW1-Greedy\CS440-HW1-Greedy\Maze\Maze\bin\Debug\Maze.exe
+I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\CS440-HW1-Greedy\CS440-HW1-Greedy\Maze\Maze\bin\Debug\Maze.pdb
+I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\CS440-HW1-Greedy\CS440-HW1-Greedy\Maze\Maze\obj\Debug\Maze.csprojResolveAssemblyReference.cache
