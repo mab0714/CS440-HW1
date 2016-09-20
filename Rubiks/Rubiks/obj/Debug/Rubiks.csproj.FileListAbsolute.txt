@@ -1,0 +1,12 @@
+C:\Users\Marvo\Desktop\Rubiks\Rubiks\obj\Debug\Rubiks.csprojResolveAssemblyReference.cache
+C:\Users\Marvo\Desktop\Rubiks\Rubiks\bin\Debug\Rubiks.exe.config
+C:\Users\Marvo\Desktop\Rubiks\Rubiks\bin\Debug\Rubiks.exe
+C:\Users\Marvo\Desktop\Rubiks\Rubiks\bin\Debug\Rubiks.pdb
+C:\Users\Marvo\Desktop\Rubiks\Rubiks\obj\Debug\Rubiks.exe
+C:\Users\Marvo\Desktop\Rubiks\Rubiks\obj\Debug\Rubiks.pdb
+I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\Rubiks\Rubiks\bin\Debug\Rubiks.exe.config
+I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\Rubiks\Rubiks\obj\Debug\Rubiks.exe
+I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\Rubiks\Rubiks\obj\Debug\Rubiks.pdb
+I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\Rubiks\Rubiks\bin\Debug\Rubiks.exe
+I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\Rubiks\Rubiks\bin\Debug\Rubiks.pdb
+I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\Rubiks\Rubiks\obj\Debug\Rubiks.csprojResolveAssemblyReference.cache
