@@ -9,10 +9,19 @@ using System.Threading;
 namespace Maze
 {
     class Program
-    {        
+    {
         static void Main(string[] args)
         {
-            string mazeData = "I:\\Backup\\Masters\\UIUC\\2016\\Fall\\CS_440\\Homework\\1\\bigMaze.txt";
+            string mazeData = "";
+            if (args[0] != null)
+            {
+                mazeData = args[0];
+            }
+            else
+            { 
+                mazeData = "I:\\Backup\\Masters\\UIUC\\2016\\Fall\\CS_440\\Homework\\1\\openMaze.txt";
+            }
+            
             List<List<char>> mazeBoard = new List<List<char>>();
             List<Node> visitedNodes = new List<Node>();
             List<Node> pathToGoalState = new List<Node>();
@@ -63,20 +72,98 @@ namespace Maze
             Console.Clear();
             Display(mazeBoard);
 
+
             // Start State 
             //Console.WriteLine(mazeBoard[intStartY][intStartX]);
             Console.WriteLine("Start State: " + intStartX + " " + intStartY + ": " + mazeBoard[intStartY][intStartX]);
-            Node startStateNode = new Node(intStartX, intStartY, null);
-            
+            //Node startStateNode = new Node(intStartX, intStartY, null);
+
             // Goal State
             //Console.WriteLine(mazeBoard[intGoalY][intGoalX]);
             Console.WriteLine("Goal State: " + intGoalX + " " + intGoalY + ": " + mazeBoard[intGoalY][intGoalX]);
-            Node endGoalNode = new Node(intGoalX, intGoalY, null);
-            Node currentNode = startStateNode;
-            
-            Random rand = new Random();
+
+            string algorithm = "";
+            int value = 0;
+            bool keepAsking = true;
+            while (keepAsking)
+            {
+                Console.WriteLine("Navigating through: " + mazeData);
+
+                Console.WriteLine("What algorithm do you want to run? (1-4)");
+                Console.WriteLine("1 for DFS");
+                Console.WriteLine("2 for BFS");
+                Console.WriteLine("3 for Greedy");
+                Console.WriteLine("4 for A*");
+                algorithm = Console.ReadLine(); // Read string from console
+                if (int.TryParse(algorithm, out value)) // Try to parse the string as an integer
+                {
+                    if (value > 4)
+                    {
+                        Console.WriteLine("Please enter value between 1 and 4!");
+                        continue;
+                    }
+                    else
+                    {
+                        keepAsking = false;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Not an integer!");
+                }
+
+            }
+            keepAsking = true;
+            int maxDepth = 0;
+            while (keepAsking)
+            {
+                Console.WriteLine("What depth do you want to run (integer)");                
+                algorithm = Console.ReadLine(); // Read string from console
+                if (int.TryParse(algorithm, out maxDepth)) // Try to parse the string as an integer
+                {
+                    keepAsking = false;                 
+                }
+                else
+                {
+                    Console.WriteLine("Not an integer!");
+                }
+
+            }
+
+
+            //Random rand = new Random();
             // Log start of search
             DateTime start = DateTime.Now;
+
+            
+            List<Node> nextOptions = new List<Node>();
+            Node endGoalNode = new Node(intGoalX, intGoalY, null);
+            Node startStateNode = new Node(intStartX, intStartY, null, endGoalNode);
+            Node currentNode = startStateNode;
+            int tmpDepth = 0;
+            nextOptions.Add(currentNode);
+            while (!found)
+            {
+                if (tmpDepth > maxDepth)
+                {
+                    break;
+                }
+
+                // May need this code below if we decide to pass in list of goalStateNodes
+
+                //if (goalStateNodes != null)
+                //{
+                //found = findAPathHash(currentGeneration, goalStateNodes, visitedNodesHash, pathToGoalState, otherChildNodes, refreshDelayMS, maxDepth);
+
+                found = findPath(value, nextOptions, endGoalNode, mazeBoard, visitedNodes, pathToGoalState, otherChildNodes, refreshDelayMS, tmpDepth);
+                tmpDepth++;
+                //}
+                //else
+                //{
+                //    break;
+                //}
+            }
+
             // DFS
             //found = findDFSPath(currentNode, endGoalNode, mazeBoard, visitedNodes, pathToGoalState, rand, otherChildNodes, refreshDelayMS);
 
@@ -86,11 +173,11 @@ namespace Maze
             //found = findBFSPath(currentGeneration, endGoalNode, mazeBoard, visitedNodes, pathToGoalState, otherChildNodes, refreshDelayMS);
 
             // Greedy 
-            Node startStateNodeG = new Node(intStartX, intStartY, null, endGoalNode);
-            List<Node> currentGeneration = new List<Node>();
-            currentNode = startStateNodeG;
-            currentGeneration.Add(currentNode);
-            found = findGreedyPath(currentGeneration, endGoalNode, mazeBoard, visitedNodes, pathToGoalState, otherChildNodes, refreshDelayMS);
+            //Node startStateNodeG = new Node(intStartX, intStartY, null, endGoalNode);
+            //List<Node> currentGeneration = new List<Node>();
+            //currentNode = startStateNodeG;
+            //currentGeneration.Add(currentNode);
+            //found = findGreedyPath(currentGeneration, endGoalNode, mazeBoard, visitedNodes, pathToGoalState, otherChildNodes, refreshDelayMS);
 
             // A*
             //Node startStateNodeA = new Node(intStartX, intStartY, null, endGoalNode);
@@ -98,20 +185,6 @@ namespace Maze
             //currentNode = startStateNodeA;
             //currentGeneration.Add(currentNode);
             //found = findAPath(currentGeneration, endGoalNode, mazeBoard, visitedNodes, pathToGoalState, otherChildNodes, refreshDelayMS);
-
-            //Node n1 = new Node(1, 1, null);
-            //n1.f = 192;
-            //Node n2 = new Node(2, 3, null);
-            //n2.f = 89;
-
-            //List<Node> nList = new List<Node>();
-            //nList.Add(n1);
-            //nList.Add(n2);
-
-            //List<Node> sortList = nList.OrderBy(o => o.f).ToList();
-
-            //Console.WriteLine("Node (" + sortList[0].x + "," + sortList[0].y + ") has f: " + sortList[0].f);
-
 
             // Log end of search
             DateTime end = DateTime.Now;
@@ -147,10 +220,224 @@ namespace Maze
                 Console.WriteLine("****************");
             }
 
-                Console.WriteLine("Press anykey to quit");
+            Console.WriteLine("Press anykey to quit");
             Console.ReadKey();
             
         }
+
+        static bool findPath(int algo, List<Node> nextOptions, Node goalStateNode, List<List<char>> mazeBoard, List<Node> visitedNodes, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS, int maxDepth)
+        {
+            Node currentNode = new Node(0, 0, null, goalStateNode);
+            Node nextNode = new Node(0, 0, null, goalStateNode);
+
+            List<Node> sortList = new List<Node>();
+
+            while (nextOptions.Count > 0)
+            {
+                // algo = 1 DFS, 2 BFS, 3 Greedy, 4 A*
+                if (algo == 1)
+                {
+                    // TODO:
+                    sortList = nextOptions.OrderByDescending(o => o.g).ToList();
+                }
+                else if (algo == 2)
+                {
+                    sortList = nextOptions.OrderBy(o => o.g).ToList();
+                }
+                else if (algo == 3)
+                {
+                    sortList = nextOptions.OrderBy(o => o.g).ToList();
+                }
+                else if (algo == 4)
+                {
+                    sortList = nextOptions.OrderBy(o => o.f).ThenBy(n => n.h).ToList();
+                }
+
+                // Get the best option of the nextOptions.
+                // If there is no other options, no solution found.
+                currentNode = sortList[0];
+
+                // Has the one I chose, by my algorithm violated my depth
+                if (currentNode.g > maxDepth)
+                {
+                    return false;
+                }
+
+                // Have I visited this already?
+                if (!visitedNodes.Contains(currentNode))
+                {
+                    // Mark as visited
+                    visitedNodes.Add(currentNode);
+
+                    // Update on the board
+                    mazeBoard[currentNode.y][currentNode.x] = 'v';
+
+                    // Show previous board on console for a few seconds before updating
+                    Thread.Sleep(refreshDelayMS);
+
+                    // Now show new mazeBoard
+                    Console.Clear();
+                    Display(mazeBoard);
+
+                    // Check goalState
+                    if (currentNode.Equals(goalStateNode))
+                    {
+                        // I'm done.  Calculate my finalPathOfNodes by backtracking from my currentNode to the node which has no parent (root)
+                        finalPathOfNodes.Clear();
+                        finalPathOfNodes.Add(currentNode);
+                        Node tmpNode = new Node(currentNode.x, currentNode.y, currentNode.parentNode);
+                        // Mark paths with '.'
+                        while (tmpNode.parentNode != null)
+                        {
+                            mazeBoard[tmpNode.y][tmpNode.x] = '.';
+                            nextNode = tmpNode.parentNode;
+                            finalPathOfNodes.Add(nextNode);
+                            tmpNode = nextNode;
+                        }
+                        // Mark the root as 'P'
+                        mazeBoard[tmpNode.y][tmpNode.x] = 'P';
+                        // Show maze for a few seconds
+                        Thread.Sleep(refreshDelayMS);
+                        Console.Clear();
+                        Display(mazeBoard);
+
+                        return true;
+                    }
+                    else
+                    {
+                        // Not done, need to do work.
+                        // What can this currentNode add to the Frontier (N,S,E,W)
+                        if (currentNode.childNodes == null)
+                        {
+                            // May need to compare findEligibleChildren with A version (f,g,h changes and in original, I disallow child nodes to be eligible)
+                            currentNode.childNodes = currentNode.findEligibleChildrenA(mazeBoard);
+                        }
+
+                        // Show node investigating
+                        currentNode.showNodeInfo();
+
+                        // Are there child nodes?  What can I add to frontier?
+                        if (currentNode.childNodes != null && currentNode.childNodes.Count > 0)
+                        {
+
+                            // Mark childNodes as being already a child to some other parent.
+                            foreach (Node n in currentNode.childNodes)
+                            {
+                                // If it doesn't belong to a parent, mark it
+                                if (!otherChildNodes.Contains(n))
+                                {
+                                    otherChildNodes.Add(n);
+                                }
+                                else
+                                {
+                                    // If it does (DFS/BFS) need to handle this.
+                                    if (algo == 1)
+                                    {
+                                        // DFS this node can be revisited if we dont remove
+                                        // EX:
+                                        //                R
+                                        //             A    B
+                                        //            C D  C E
+                                        //  Visit A, C, D...then B, C (gets revisited, but shouldn't).  Remove.
+                                        // Remove B's child C                                        
+                                        otherChildNodes.Remove(n);
+                                    }
+                                    else if (algo == 2)
+                                    {
+                                        // BFS this node is already claimed
+                                        // EX:
+                                        //                R
+                                        //             A    B
+                                        //            C D  C E
+                                        // Remove B's child C
+                                        otherChildNodes.Remove(n);
+                                    }
+                                    else if (algo == 3)
+                                    {
+                                        // In Greedy, it's Unit Step Cost.  No need to update anything. But don't want to revisit it.
+                                        // Greedy this node is already claimed
+                                        // EX:
+                                        //                R
+                                        //             A    B
+                                        //            C D  C E
+                                        // Remove B's child C
+                                        otherChildNodes.Remove(n);
+                                    }
+                                    else if (algo == 4)
+                                    {
+                                        // A* needs to check if a node has a cheaper total path cost.  
+                                        if (otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).f > n.f)
+                                        {
+                                            // Update parentNode, g, h, f 
+                                            otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).parentNode = currentNode;
+                                            otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).f = n.f;
+                                            otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).g = n.g;
+                                            otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).h = n.h;
+                                            // If it's updated, it may need to be revisited.
+                                            if (visitedNodes.Contains(n))
+                                            {
+                                                visitedNodes.Remove(n);
+                                            }
+
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                        // Remove this node from the Frontier
+                        nextOptions.Remove(currentNode);
+
+                        // Remove visited childNodes as repeatable options.
+                        // Is this needed?  Does it hurt?
+                        foreach (Node n in visitedNodes)
+                        {
+                            if (otherChildNodes.Contains(n))
+                            {
+                                otherChildNodes.Remove(n);
+                            }
+                        }
+
+                        // Add new children to the frontier
+                        // Update any recalculated otherChildNodes into the nextOption list.
+                        foreach (Node n in otherChildNodes)
+                        {
+                            if (nextOptions.Contains(n))
+                            {
+                                nextOptions.Remove(n);
+                            }
+
+                            nextOptions.Add(n);
+                        }
+
+                        //return false;
+                        //findGreedyPath(nextOptions, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
+
+                    }
+
+                }
+                else
+                {
+                    // visited already, remove this for Frontier
+                    // don't return to get out of routine.  Move on to next available from our sortedList (Frontier)
+                    sortList.Remove(currentNode);  // don't want to keep checking this in a loop.  Needs to be removed from sortList for next iteration.
+                    nextOptions.Remove(currentNode);  // may not be needed as this section is primarily for moving on to other siblings within this depth.  nextOptions has no impact here.
+
+                    //if (nextOptions != null)
+                    //{
+                    //    sortList = nextOptions.OrderBy(o => o.f).ToList();
+                    //    findGreedyPath(sortList, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
+                    //}
+                    //else
+                    //{
+                    //    return false;
+                    //}
+                }
+            }
+            return false;
+
+        }
+
 
         static bool findDFSPath(Node currentNode, Node goalStateNode, List<List<char>> mazeBoard, List<Node> visitedNodes, List<Node> finalPathOfNodes, Random rand, List<Node> otherChildNodes, int refreshDelayMS)
         {
@@ -185,7 +472,7 @@ namespace Maze
                 Thread.Sleep(refreshDelayMS);
                 Console.Clear();
                 Display(mazeBoard);
-            
+
                 return true;
             }
             else
@@ -390,6 +677,9 @@ namespace Maze
             return false;
 
         }
+
+
+
         static bool findGreedyPath(List<Node> nextOptions, Node goalStateNode, List<List<char>> mazeBoard, List<Node> visitedNodes, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS)
         {
             Node currentNode = new Node(0, 0, null, goalStateNode);
@@ -564,7 +854,7 @@ namespace Maze
                     {
                         currentNode.childNodes = currentNode.findEligibleChildren(mazeBoard, otherChildNodes);
                     }
-                    
+
                     currentNode.showNodeInfo();
 
                     //int randNumber = 0;
@@ -614,148 +904,150 @@ namespace Maze
 
         static bool findAPath(List<Node> nextOptions, Node goalStateNode, List<List<char>> mazeBoard, List<Node> visitedNodes, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS)
         {
-            Node currentNode = new Node(0, 0, null, goalStateNode);
-            Node nextNode = new Node(0, 0, null, goalStateNode);    
-            List<Node> sortList = nextOptions.OrderBy(o => o.f).ToList();
-
-            // Get the best option of the nextOptions.
-            // If there is no other options, no solution found.
-            if (sortList[0] != null)
+            while (nextOptions.Count > 0)
             {
-                currentNode = sortList[0];
-            }
-            else {
-                return false;
-            }
+                Node currentNode = new Node(0, 0, null, goalStateNode);
+                Node nextNode = new Node(0, 0, null, goalStateNode);
+                List<Node> sortList = nextOptions.OrderBy(o => o.f).ToList();
 
-            if (!visitedNodes.Contains(currentNode))
-            {
-                visitedNodes.Add(currentNode);
-
-                mazeBoard[currentNode.y][currentNode.x] = 'v';
-                Thread.Sleep(refreshDelayMS);
-                Console.Clear();
-                Display(mazeBoard);
-
-                if (currentNode.Equals(goalStateNode))
+                // Get the best option of the nextOptions.
+                // If there is no other options, no solution found.
+                if (sortList[0] != null)
                 {
-                    finalPathOfNodes.Clear();
-                    finalPathOfNodes.Add(currentNode);
-                    Node tmpNode = new Node(currentNode.x, currentNode.y, currentNode.parentNode);
-                    while (tmpNode.parentNode != null)
-                    {
-                        mazeBoard[tmpNode.y][tmpNode.x] = '.';
-                        nextNode = tmpNode.parentNode;
-                        finalPathOfNodes.Add(nextNode);
-                        tmpNode = nextNode;
-                    }
-                    mazeBoard[tmpNode.y][tmpNode.x] = 'P';
-                    Thread.Sleep(refreshDelayMS);
-                    Console.Clear();
-                    Display(mazeBoard);
-
-                    return true;
-                }
-                else
-                {
-                    if (currentNode.childNodes == null)
-                    {
-                        currentNode.childNodes = currentNode.findEligibleChildrenA(mazeBoard);
-                    }
-
-                    currentNode.showNodeInfo();
-                    //foreach(Node n in sortList)
-                    //{
-                    //    Console.WriteLine("Node f: " + n.f + " (" + n.x + "," + n.y + ")");
-                    //}
-
-                            if (currentNode.childNodes != null && currentNode.childNodes.Count > 0)
-                    {
-
-                        //// Remove visited childNodes as repeatable options.
-                        //foreach (Node n in visitedNodes)
-                        //{
-                        //    if (currentNode.childNodes.Contains(n))
-                        //    {
-                        //        currentNode.childNodes.Remove(n);
-                        //    }
-                        //}
-
-                        // Mark childNodes as being already a child to some other parent.
-                        foreach (Node n in currentNode.childNodes)
-                        {
-                            if (!otherChildNodes.Contains(n))
-                            {
-                                otherChildNodes.Add(n);
-                            }
-                            else
-                            {
-                                if (otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).f > n.f)
-                                {
-                                    // Update parentNode, g, h, f 
-                                    otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).parentNode = currentNode;
-                                    otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).f = n.f;
-                                    otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).g = n.g;
-                                    otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).h = n.h;
-                                    // If it's updated, it may need to be revisited.
-                                    if (visitedNodes.Contains(n))
-                                    {
-                                        visitedNodes.Remove(n);
-                                    }
-
-                                }
-                            }
-                        }
-
-                    }
-                    nextOptions.Remove(currentNode);
-
-                    //if (currentNode.x == 15 && currentNode.y == 8)
-                    //{
-                    //    Console.Write("test");
-                    //}
-
-                    // Remove visited childNodes as repeatable options.
-                    foreach (Node n in visitedNodes)
-                    {
-                        if (otherChildNodes.Contains(n))
-                        {
-                            otherChildNodes.Remove(n);
-                        }
-                    }
-
-                    // Update any recalculated otherChildNodes into the nextOption list.
-                    foreach (Node n in otherChildNodes)
-                    {
-                        if (nextOptions.Contains(n))
-                        {
-                            nextOptions.Remove(n);
-                        }
-
-                        nextOptions.Add(n);
-                    }
-                    
-                    findAPath(nextOptions, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
-
-                }
-
-            }
-            else
-            {
-                nextOptions.Remove(currentNode);
-                if (nextOptions != null)
-                {
-                    sortList = nextOptions.OrderBy(o => o.f).ToList();
-                    findAPath(sortList, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
+                    currentNode = sortList[0];
                 }
                 else
                 {
                     return false;
                 }
+
+                if (!visitedNodes.Contains(currentNode))
+                {
+                    visitedNodes.Add(currentNode);
+
+                    mazeBoard[currentNode.y][currentNode.x] = 'v';
+                    Thread.Sleep(refreshDelayMS);
+                    Console.Clear();
+                    Display(mazeBoard);
+
+                    if (currentNode.Equals(goalStateNode))
+                    {
+                        finalPathOfNodes.Clear();
+                        finalPathOfNodes.Add(currentNode);
+                        Node tmpNode = new Node(currentNode.x, currentNode.y, currentNode.parentNode);
+                        while (tmpNode.parentNode != null)
+                        {
+                            mazeBoard[tmpNode.y][tmpNode.x] = '.';
+                            nextNode = tmpNode.parentNode;
+                            finalPathOfNodes.Add(nextNode);
+                            tmpNode = nextNode;
+                        }
+                        mazeBoard[tmpNode.y][tmpNode.x] = 'P';
+                        Thread.Sleep(refreshDelayMS);
+                        Console.Clear();
+                        Display(mazeBoard);
+
+                        return true;
+                    }
+                    else
+                    {
+                        if (currentNode.childNodes == null)
+                        {
+                            currentNode.childNodes = currentNode.findEligibleChildrenA(mazeBoard);
+                        }
+
+                        currentNode.showNodeInfo();
+                        //foreach(Node n in sortList)
+                        //{
+                        //    Console.WriteLine("Node f: " + n.f + " (" + n.x + "," + n.y + ")");
+                        //}
+
+                        if (currentNode.childNodes != null && currentNode.childNodes.Count > 0)
+                        {
+
+                            //// Remove visited childNodes as repeatable options.
+                            //foreach (Node n in visitedNodes)
+                            //{
+                            //    if (currentNode.childNodes.Contains(n))
+                            //    {
+                            //        currentNode.childNodes.Remove(n);
+                            //    }
+                            //}
+
+                            // Mark childNodes as being already a child to some other parent.
+                            foreach (Node n in currentNode.childNodes)
+                            {
+                                if (!otherChildNodes.Contains(n))
+                                {
+                                    otherChildNodes.Add(n);
+                                }
+                                else
+                                {
+                                    if (otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).f > n.f)
+                                    {
+                                        // Update parentNode, g, h, f 
+                                        otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).parentNode = currentNode;
+                                        otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).f = n.f;
+                                        otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).g = n.g;
+                                        otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).h = n.h;
+                                        // If it's updated, it may need to be revisited.
+                                        if (visitedNodes.Contains(n))
+                                        {
+                                            visitedNodes.Remove(n);
+                                        }
+
+                                    }
+                                }
+                            }
+
+                        }
+                        nextOptions.Remove(currentNode);
+
+                        //if (currentNode.x == 15 && currentNode.y == 8)
+                        //{
+                        //    Console.Write("test");
+                        //}
+
+                        // Remove visited childNodes as repeatable options.
+                        foreach (Node n in visitedNodes)
+                        {
+                            if (otherChildNodes.Contains(n))
+                            {
+                                otherChildNodes.Remove(n);
+                            }
+                        }
+
+                        // Update any recalculated otherChildNodes into the nextOption list.
+                        foreach (Node n in otherChildNodes)
+                        {
+                            if (nextOptions.Contains(n))
+                            {
+                                nextOptions.Remove(n);
+                            }
+
+                            nextOptions.Add(n);
+                        }
+
+                        findAPath(nextOptions, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
+
+                    }
+
+                }
+                else
+                {
+                    nextOptions.Remove(currentNode);
+                    if (nextOptions != null)
+                    {
+                        sortList = nextOptions.OrderBy(o => o.f).ToList();
+                        findAPath(sortList, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
             }
-
-            return true;
-
+            return false;
         }
 
         static Node getClosestNode(List<Node> childNodes, Node goalStateNode)
@@ -792,7 +1084,7 @@ namespace Maze
             //
             // Display everything in the List.
             //
-            Console.WriteLine("Board:");
+            Console.WriteLine("Maze Board:");
             foreach (var sublist in list)
             {
                 foreach (var value in sublist)

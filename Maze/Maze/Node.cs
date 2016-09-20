@@ -120,7 +120,7 @@ namespace Maze
             // See N   check if parentNode is not null, then check i'm not going to revisit a parent
             Node tmpNode = new Node(this._x, this._y - 1, this);
 
-            if (isWalkable(this._x, this._y - 1, mazeBoard) && 
+            if (isWalkable(this._x, this._y - 1, mazeBoard) &&
                //(((this._parentNode != null && !(this._parentNode._x != this.x || this._parentNode._y != this._y - 1)) || this._parentNode == null)) && 
                !otherChildNodes.Contains(tmpNode))
             {
@@ -131,7 +131,7 @@ namespace Maze
                 AddChild(tmpNode);
             }
 
-            
+
 
             //// See NE
             //tmpNode = new Node(this._x + 1, this._y - 1, this);
@@ -145,10 +145,10 @@ namespace Maze
             //    //tmpNode.goalStateNode = this.goalStateNode;
             //    AddChild(tmpNode);
             //}
-            
+
             // See E
             tmpNode = new Node(this._x + 1, this._y, this);
-            if (isWalkable(this._x + 1, this._y, mazeBoard) && 
+            if (isWalkable(this._x + 1, this._y, mazeBoard) &&
                 //(((this._parentNode != null && !(this._parentNode._x != this.x + 1 || this._parentNode._y != this._y)) || this._parentNode == null)) && 
                 !otherChildNodes.Contains(tmpNode))
             {
@@ -174,7 +174,7 @@ namespace Maze
 
             // See S
             tmpNode = new Node(this._x, this._y + 1, this);
-            if (isWalkable(this._x, this._y + 1, mazeBoard) && 
+            if (isWalkable(this._x, this._y + 1, mazeBoard) &&
                 //(((this._parentNode != null && !(this._parentNode._x != this.x || this._parentNode._y != this._y + 1)) || this._parentNode == null)) && 
                 !otherChildNodes.Contains(tmpNode))
             {
@@ -200,7 +200,7 @@ namespace Maze
 
             // See W
             tmpNode = new Node(this._x - 1, this._y, this);
-            if (isWalkable(this._x - 1, this._y, mazeBoard) && 
+            if (isWalkable(this._x - 1, this._y, mazeBoard) &&
                 //(((this._parentNode != null && !(this._parentNode._x != this.x - 1 || this._parentNode._y != this._y)) || this._parentNode == null)) && 
                 !otherChildNodes.Contains(tmpNode))
             {
@@ -238,7 +238,7 @@ namespace Maze
 
             if (isWalkable(this._x, this._y - 1, mazeBoard))
             {
-                tmpNode.g = tmpNode.parentNode.g + 10;
+                tmpNode.g = tmpNode.parentNode.g + 1;
                 tmpNode.h = calcManhattanDistance(this._x, this.y - 1);
                 tmpNode.f = tmpNode.g + tmpNode.h;
                 tmpNode.goalStateNode = this.goalStateNode;
@@ -262,7 +262,7 @@ namespace Maze
             tmpNode = new Node(this._x + 1, this._y, this);
             if (isWalkable(this._x + 1, this._y, mazeBoard))
             {
-                tmpNode.g = tmpNode.parentNode.g + 10;
+                tmpNode.g = tmpNode.parentNode.g + 1;
                 tmpNode.h = calcManhattanDistance(this._x + 1, this._y);
                 tmpNode.f = tmpNode.g + tmpNode.h;
                 tmpNode.goalStateNode = this.goalStateNode;
@@ -284,7 +284,7 @@ namespace Maze
             tmpNode = new Node(this._x, this._y + 1, this);
             if (isWalkable(this._x, this._y + 1, mazeBoard))
             {
-                tmpNode.g = tmpNode.parentNode.g + 10;
+                tmpNode.g = tmpNode.parentNode.g + 1;
                 tmpNode.h = calcManhattanDistance(this._x, this._y + 1);
                 tmpNode.f = tmpNode.g + tmpNode.h;
                 tmpNode.goalStateNode = this.goalStateNode;
@@ -306,7 +306,7 @@ namespace Maze
             tmpNode = new Node(this._x - 1, this._y, this);
             if (isWalkable(this._x - 1, this._y, mazeBoard))
             {
-                tmpNode.g = tmpNode.parentNode.g + 10;
+                tmpNode.g = tmpNode.parentNode.g + 1;
                 tmpNode.h = calcManhattanDistance(this._x - 1, this._y);
                 tmpNode.f = tmpNode.g + tmpNode.h;
                 tmpNode.goalStateNode = this.goalStateNode;
