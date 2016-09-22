@@ -23,7 +23,9 @@ namespace Maze
 
         private Node _parentNode;  // reference to parent node
         private List<Node> _childNodes; // list of child nodes
-        private Node _goalStateNode; 
+        private Node _goalStateNode;
+        private int _numGoals;
+        // private bool _isWall;
 
         public bool _isInitialized;
 
@@ -41,6 +43,16 @@ namespace Maze
             this._y = y;
             this._parentNode = parentNode;
             this._goalStateNode = goalStateNode;
+            this._isInitialized = true;
+        }
+
+        public Node(int x, int y, Node parentNode, int numGoals)
+        {
+            this._x = x;
+            this._y = y;
+            this._parentNode = parentNode;
+            this._numGoals = numGoals;
+   
             this._isInitialized = true;
         }
 
@@ -84,6 +96,12 @@ namespace Maze
             set { this._goalStateNode = value; }
 
         }
+
+        public Node goalStateNums
+        {
+            get { return this._goalStateNode; }
+            set { this._goalStateNode = value; }
+        }
         public List<Node> childNodes
         {
             get { return this._childNodes; }
@@ -113,6 +131,25 @@ namespace Maze
 
             z = xdelta + ydelta;
             return z;
+        }
+
+        private int calcHvalueMultiple(int x, int y, List<Node> goalList)
+        {
+            int furthest = 0;
+            int curSum = 0;
+            foreach(Node node in goalList)
+            {
+                if(curSum > furthest)
+                {
+                    furthest = curSum;
+                }
+                else
+                {
+                    curSum = Math.Abs(x-node.x)+Math.Abs(y-node.y);
+                }
+            }
+            furthest = furthest + goalList.Count - 1;
+            return furthest;
         }
 
         public List<Node> findEligibleChildren(List<List<char>> mazeBoard, List<Node> otherChildNodes)
@@ -329,6 +366,64 @@ namespace Maze
             }
             return _childNodes;
         }
+
+        public List<Node> findEligibleChildrenAMultiple(List<List<char>> mazeBoard, List<Node> goalList)
+        {
+            // See N   check if parentNode is not null, then check i'm not going to revisit a parent
+            Node tmpNode = new Node(this._x, this._y - 1, this);
+            if (isWalkable(this._x, this._y - 1, mazeBoard))
+            {
+                tmpNode.g = tmpNode.parentNode.g + 1;
+                tmpNode.h = calcHvalueMultiple(this._x, this.y - 1, goalList);
+                tmpNode.f = tmpNode.g + tmpNode.h;
+                // tmpNode.goalStateNode = this.goalStateNode;
+                tmpNode._numGoals = this._numGoals;
+                AddChild(tmpNode);
+            }
+
+            // See E
+            tmpNode = new Node(this._x + 1, this._y, this);
+            if (isWalkable(this._x + 1, this._y, mazeBoard))
+            {
+                tmpNode.g = tmpNode.parentNode.g + 1;
+                tmpNode.h = calcHvalueMultiple(this._x + 1, this._y, goalList);
+                tmpNode.f = tmpNode.g + tmpNode.h;
+                // tmpNode.goalStateNode = this.goalStateNode;
+                tmpNode._numGoals = this._numGoals;
+                AddChild(tmpNode);
+            }
+
+            // See S
+            tmpNode = new Node(this._x, this._y + 1, this);
+            if (isWalkable(this._x, this._y + 1, mazeBoard))
+            {
+                tmpNode.g = tmpNode.parentNode.g + 1;
+                tmpNode.h = calcHvalueMultiple(this._x, this._y + 1, goalList);
+                tmpNode.f = tmpNode.g + tmpNode.h;
+                // tmpNode.goalStateNode = this.goalStateNode;
+                tmpNode._numGoals = this._numGoals;
+                AddChild(tmpNode);
+            }
+
+            // See W
+            tmpNode = new Node(this._x - 1, this._y, this);
+            if (isWalkable(this._x - 1, this._y, mazeBoard))
+            {
+                tmpNode.g = tmpNode.parentNode.g + 1;
+                tmpNode.h = calcHvalueMultiple(this._x - 1, this._y, goalList);
+                tmpNode.f = tmpNode.g + tmpNode.h;
+                // tmpNode.goalStateNode = this.goalStateNode;
+                tmpNode._numGoals = this._numGoals;
+                AddChild(tmpNode);
+            }
+
+            if (this._parentNode != null && this._childNodes != null)
+            {
+                _childNodes.Remove(this._parentNode);
+            }
+            return _childNodes;
+        }
+
         private bool isWalkable(int x, int y, List<List<char>> mazeBoard)
         {
             try
