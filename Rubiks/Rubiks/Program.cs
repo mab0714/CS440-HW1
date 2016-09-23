@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,9 @@ namespace Rubiks
             int userDefinedDepth = 0;
             DateTime startPatternDB = DateTime.Now;
             DateTime endPatternDB = DateTime.Now;
+
+            Console.SetWindowSize(Console.LargestWindowWidth, Console.LargestWindowHeight);
+
             int maxDepth = 0;
             if (args[0] != null)
             {
@@ -61,7 +65,7 @@ namespace Rubiks
                 algorithm = Console.ReadLine(); // Read string from console
                 if (int.TryParse(algorithm, out valueAlg)) // Try to parse the string as an integer
                 {
-                    if (valueAlg > 2)
+                    if (valueAlg < 0 && valueAlg > 2)
                     {
                         Console.WriteLine("Please enter value between 1 and 2!");
                         continue;
@@ -121,35 +125,64 @@ namespace Rubiks
                 else
                 {
                     createPatternDB = false;
-                    string depth = "";
-                    int valueDepth = 0;
-                    keepAsking = true;
-                    while (keepAsking)
-                    {
-                        Console.WriteLine("What is the max depth desired for the search? (Note, the higher the number, the longer the search)");                        
-
-                        depth = Console.ReadLine(); // Read string from console
-                        if (int.TryParse(depth, out valueDepth)) // Try to parse the string as an integer
-                        {
-                            if (valueDepth < 1)
-                            {
-                                Console.WriteLine("Please enter value > 1!");
-                                continue;
-                            }
-                            else
-                            { 
-                                keepAsking = false;
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("Not an integer!");
-                        }
-
-                    }
-
-                    userDefinedDepth = valueDepth;
                 }
+            }
+
+            string depth = "";
+            int valueDepth = 0;
+            keepAsking = true;
+            while (keepAsking)
+            {
+                Console.WriteLine("What is the max depth desired for the search? (Note, the higher the number, the longer the search)");
+
+                depth = Console.ReadLine(); // Read string from console
+                if (int.TryParse(depth, out valueDepth)) // Try to parse the string as an integer
+                {
+                    if (valueDepth < 1)
+                    {
+                        Console.WriteLine("Please enter value > 1!");
+                        continue;
+                    }
+                    else
+                    {
+                        keepAsking = false;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Not an integer!");
+                }
+
+            }
+
+            userDefinedDepth = valueDepth;
+
+            string heuristic = "";
+            int valueDivideHeuristic = 0;
+            keepAsking = true;
+            while (keepAsking)
+            {
+                Console.WriteLine("Divide the heuristic? If so, by how much? (IE: 4, max of 24)");
+                Console.WriteLine("The higher the number may result in a slower search, but perhaps more optimal!");
+
+                heuristic = Console.ReadLine(); // Read string from console
+                if (int.TryParse(heuristic, out valueDivideHeuristic)) // Try to parse the string as an integer
+                {
+                    if (valueDivideHeuristic > 24)
+                    {
+                        Console.WriteLine("Please enter value below 24!");
+                        continue;
+                    }
+                    else
+                    {
+                        keepAsking = false;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Not an integer!");
+                }
+
             }
 
             // StartState 
@@ -172,10 +205,11 @@ namespace Rubiks
             List<Node> visitedNodes = new List<Node>();
 
             // Hash of visitedNodes with rotationalInvariance (can be used with/without rotationalInvariance)
-            Dictionary<int, List<Node>> visitedNodesHash = new Dictionary<int, List<Node>>();
+            ConcurrentDictionary<int, List<Node>> visitedNodesHash = new ConcurrentDictionary<int, List<Node>>();
 
             // Create upper bound by creating pattern database
-            Dictionary<List<List<char>>, int> patternDB = new Dictionary<List<List<char>>, int>();
+            Dictionary<String, int> patternDB = new Dictionary<String, int>();
+            List<String> visitedStates = new List<String>();
 
             // flag indicating if solution was found
             bool found = false;
@@ -330,7 +364,7 @@ namespace Rubiks
 
             startStateNode.Move = "Start";
             startStateNode.g = 0;
-            startStateNode.h = (int)Math.Ceiling((24.0 - (Double)startStateNode.Matches(endGoalNode)) / 4.0);
+            startStateNode.h = (int)Math.Ceiling((24.0 - (Double)startStateNode.Matches(endGoalNode)) / (double) valueDivideHeuristic);
             startStateNode.f = startStateNode.g + startStateNode.h;
             startStateNode.goalStateNode = endGoalNode;
 
@@ -342,18 +376,36 @@ namespace Rubiks
             // A*
             List<Node> currentGeneration = new List<Node>();
             currentGeneration.Add(startStateNode);
-
+            bool maxDepthHit = false;
             if (!rotationalInvariance) {                 
                 goalStateNodes.Clear();
                 goalStateNodes.Add(endGoalNode);
-                found = findAPath(currentGeneration, endGoalNode, visitedNodes, pathToGoalState, otherChildNodes, refreshDelayMS);
+                //found = findAPath(currentGeneration, endGoalNode, visitedNodes, pathToGoalState, otherChildNodes, refreshDelayMS);
+
+                visitedNodesHash.TryAdd(startStateNode.Matches(endGoalNode), new List<Node>());
+
+                // Log start of search
+                start = DateTime.Now;
+                Console.WriteLine("Search started: " + start);
+                int f = 0;
+                maxDepth = userDefinedDepth;
+                while (!found)
+                {
+                    //if (d > maxDepth)
+                    if (maxDepthHit)
+                    {
+                        break;
+                    }
+
+                    found = findAPathHash(currentGeneration, endGoalNode, visitedNodesHash, pathToGoalState, otherChildNodes, refreshDelayMS, f, patternDB, valueDivideHeuristic, maxDepth, out maxDepthHit);
+                    f++;
+                }
             }
             else { 
             
                 //visitedNodesHash.Add(startStateNode.CornerMatches(endGoalNode), new List<Node>());
-                visitedNodesHash.Add(startStateNode.Matches(endGoalNode), new List<Node>());
+                visitedNodesHash.TryAdd(startStateNode.Matches(endGoalNode), new List<Node>());
 
-                maxDepth = 20;
                 int d = 0;
                 if (createPatternDB)
                 {
@@ -363,12 +415,6 @@ namespace Rubiks
                     // 2 move state, matches (12*12 total)
                     // 3 move state, matches (12*12*12 total)
                     Node tmpNode = new Node(startState, null);
-                    //List<Node> tmpList = new List<Node>();
-                    //List<Node> tmpChildList = new List<Node>();
-                    patternDB.Add(startStateNode.myState, tmpNode.Matches(endGoalNode));
-                    //tmpNode.goalStateNode = endGoalNode;
-
-                    //tmpList.Add(tmpNode);
 
                     List<List<List<char>>> tmpList = new List<List<List<char>>>();
                     List<List<List<char>>> tmpChildList = new List<List<List<char>>>();
@@ -377,28 +423,100 @@ namespace Rubiks
                     tmpList.Add(tmpStartState);
 
                     d = 0;
+                    int i = 0;
+                    bool foundMaxDepth = false;
+                    maxDepth = userDefinedDepth;
                     startPatternDB = DateTime.Now;
                     Console.WriteLine("PatternDB started: " + startPatternDB);
-                    while (d < maxDepth)
+                    while (d <= userDefinedDepth)
                     {
-                        foreach (List<List<char>> n in tmpList)
+                        for (i = 0; i < tmpList.Count; i++)
                         {
                             // Add to patternDB
                             Console.WriteLine("Pattern Database DB depth: " + d + ", size: " + patternDB.Count());
 
-                            if (d > 12)
+                            String tmpString = "";
+                            foreach (List<char> l in tmpList[i])
                             {
-                                patternDB.Add(n, Matches(n, goalState));
+                                foreach (char c in l)
+                                {
+                                    tmpString += c;
+                                }
                             }
+                            if (!visitedStates.Contains(tmpString))
+                            {
+                                visitedStates.Add(tmpString);
+                                patternDB.Add(tmpString, Matches(tmpList[i], endGoalNode.myState));
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                                                   
                             // Simulate all 12 moves, Add each in a tmpList
-                            tmpChildList.AddRange(findEligibleChildrenStatic(n));
+                            foreach (List<List<char>> l in findEligibleChildrenStatic(tmpList[i]))
+                            {
+                                // Don't loop through children if it brings us to a previously visited state in patternDB
+                                tmpString = "";
+                                foreach (List<char> tmpL in l)
+                                {
+                                    foreach (char c in tmpL)
+                                    {
+                                        tmpString += c;
+                                    }
+                                }
+                                if (!visitedStates.Contains(tmpString))
+                                {
+                                    tmpChildList.Add(l);
+                                }
+                            }
+                            //tmpChildList.AddRange(findEligibleChildrenStatic(tmpList[i]));
 
-                            if (Matches(n, goalState) == 24)
+                            // Remove any children that cause the parent to be created again, do I have the parent?
+                            // Remove if it's in teh patternDB already?
+
+                            //foreach (List<List<char>> l in tmpChildList)
+                            //{
+                            //    if (patternDB.ContainsKey(l))
+                            //    {
+                            //        tmpChildList.Remove(l);
+                            //    }
+                            //}
+
+                            tmpChildList.Distinct<List<List<char>>>().ToString();
+
+                            if (Matches(tmpList[i], endGoalNode.myState) == 24)
                             {
                                 maxDepth = d;
+                                foundMaxDepth = true;
                                 break;
                             }
                         }
+
+                        if (foundMaxDepth)
+                        {
+                            break;
+                        }
+
+
+                        //foreach (List<List<char>> n in tmpList)
+                        //{
+                        //    // Add to patternDB
+                        //    Console.WriteLine("Pattern Database DB depth: " + d + ", size: " + patternDB.Count());
+
+                        //    if (d > 12)
+                        //    {
+                        //        patternDB.Add(n, Matches(n, goalState));
+                        //    }
+                        //    // Simulate all 12 moves, Add each in a tmpList
+                        //    tmpChildList.AddRange(findEligibleChildrenStatic(n));
+
+                        //    if (Matches(n, goalState) == 24)
+                        //    {
+                        //        maxDepth = d;
+                        //        break;
+                        //    }
+                        //}
 
                         // Remove states that were already added to patternDB
                         tmpList.Clear();
@@ -421,24 +539,20 @@ namespace Rubiks
                 // Log start of search
                 start = DateTime.Now;
                 Console.WriteLine("Search started: " + start);
-                d = maxDepth;
+                
+                // this makes it A*, not IDA
+                int f = 0;
                 while (!found)
                 {
-                    if (d > maxDepth)
+                    //if (d > maxDepth)
+                    if (maxDepthHit)
                     {
                         break;
                     }
-                    //if (goalStateNodes != null)
-                    //{
-                    //found = findAPathHash(currentGeneration, goalStateNodes, visitedNodesHash, pathToGoalState, otherChildNodes, refreshDelayMS, maxDepth);
+     
+                    found = findAPathHash(currentGeneration, endGoalNode, visitedNodesHash, pathToGoalState, otherChildNodes, refreshDelayMS, f, patternDB, valueDivideHeuristic, maxDepth, out maxDepthHit);
+                    f++;
 
-                    found = findAPathHash(currentGeneration, endGoalNode, visitedNodesHash, pathToGoalState, otherChildNodes, refreshDelayMS, d, patternDB);
-                    d++;
-                    //}
-                    //else
-                    //{
-                    //    break;
-                    //}
                 }
 
             }
@@ -451,74 +565,88 @@ namespace Rubiks
                 // Display the finalPath backwards
                 pathToGoalState.Reverse();
                 List<String> moves = new List<String>();
-                foreach (Node n in pathToGoalState)
-                {
-                    n.showNodeInfo();
-                    moves.Add(n.Move);
-                }
 
-                Console.WriteLine("****************");
+                Console.WriteLine("****************************************************************");
+                Console.WriteLine("GOAL FOUND WITHIN " + userDefinedDepth + " SEQUENTIAL MOVES"); 
                 Console.WriteLine("Summary for " + startStateFile);
+                if (rotationalInvariance)
+                {
+                    Console.WriteLine("Results are for: Rotational Invariance");
+                }
+                else
+                {
+                    Console.WriteLine("Results are for: Non Rotational Invariance");
+                }
+                
                 if (createPatternDB)
                 {
                     Console.WriteLine("PatternDB created: " + (endPatternDB - startPatternDB));
                     Console.WriteLine("# of moves to goalState is: " + maxDepth);
                 }
+                Console.WriteLine("User defined maxDepth: " + userDefinedDepth);
                 Console.WriteLine("Search Started: " + start);
                 Console.WriteLine("Search Ended: " + end);
                 Console.WriteLine("Duration: " + (end - start));
-                Console.Write("Moves: ");
+                Console.WriteLine("Divided Heuristic by: " + valueDivideHeuristic);
+                int nodesVisited = 0;
+                foreach (KeyValuePair<int, List<Node>> pair in visitedNodesHash)
+                {
+                    nodesVisited = nodesVisited + pair.Value.Count();
+                }
+                
+                Console.WriteLine("Nodes visited: " + nodesVisited);
+                Console.WriteLine("Nodes in final path: " + pathToGoalState.Count());
+                Console.WriteLine("Cost of final path: " + pathToGoalState[pathToGoalState.Count - 1].f);
+                foreach (Node n in pathToGoalState)
+                {
+                    n.showNodeInfo();                    
+                    moves.Add(n.Move);
+                    Console.WriteLine("Show next step! Press any key to continue");
+                    Console.ReadKey();
+                }
+                Console.Write("Final Moves: ");
                 foreach(String m in moves)
                 {
                     Console.Write(m + " ");
                 }
-                Console.WriteLine();
-                if (!rotationalInvariance) { 
-                    Console.WriteLine("Nodes visited: " + visitedNodes.Count);
-                }
-                else 
-                { 
-                    int nodesVisited = 0;
-                    foreach (KeyValuePair<int, List<Node>> pair in visitedNodesHash)
-                    {
-                        nodesVisited = nodesVisited + pair.Value.Count();
-                    }
-
-                    Console.WriteLine("Nodes visited: " + nodesVisited);
-                }
-                Console.WriteLine("Nodes in final path: " + pathToGoalState.Count());
-                Console.WriteLine("Cost of final path: " + pathToGoalState[pathToGoalState.Count - 1].f);
-                Console.WriteLine("****************");
+                Console.WriteLine();                         
+                Console.WriteLine("****************************************************************");
 
             }
             else
             {
 
-                Console.WriteLine("****************");
+                Console.WriteLine("****************************************************************");
+                Console.WriteLine("NO GOAL FOUND WITHIN " + userDefinedDepth + " SEQUENTIAL MOVES");
                 Console.WriteLine("Summary for " + startStateFile);
+                if (rotationalInvariance)
+                {
+                    Console.WriteLine("Results are for: Rotational Invariance");
+                }
+                else
+                {
+                    Console.WriteLine("Results are for: Non Rotational Invariance");
+                }
                 if (createPatternDB)
                 {
                     Console.WriteLine("PatternDB created: " + (endPatternDB - startPatternDB));
                     Console.WriteLine("# of moves to goalState is: " + maxDepth);
                 }
+                
+                Console.WriteLine("User defined maxDepth: " + userDefinedDepth);
                 Console.WriteLine("Search Started: " + start);
                 Console.WriteLine("Search Ended: " + end);
                 Console.WriteLine("Duration: " + (end - start));
-                if (!rotationalInvariance)
-                {
-                    Console.WriteLine("Nodes visited: " + visitedNodes.Count);
-                }
-                else
-                {
-                    int nodesVisited = 0;
+                Console.WriteLine("Divided Heuristic by: " + valueDivideHeuristic);
+
+                int nodesVisited = 0;
                     foreach (KeyValuePair<int, List<Node>> pair in visitedNodesHash)
                     {
                         nodesVisited = nodesVisited + pair.Value.Count();
                     }
-
-                    Console.WriteLine("Nodes visited: " + nodesVisited);
-                }
-                Console.WriteLine("****************");
+                
+                Console.WriteLine("Nodes visited: " + nodesVisited);
+                Console.WriteLine("****************************************************************");
             }
 
             Console.WriteLine("Press anykey to quit");
@@ -656,7 +784,7 @@ namespace Rubiks
 
         }
 
-        static bool findAPathHash(List<Node> nextOptions, Node goalStateNode, Dictionary<int, List<Node>> visitedNodesDict, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS, int maxDepth, Dictionary<List<List<char>>, int> patternDB)
+        static bool findAPathHash(List<Node> nextOptions, Node goalStateNode, ConcurrentDictionary<int, List<Node>> visitedNodesDict, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS, int cost, Dictionary<String, int> patternDB, int valueDivideHeuristic, int maxDepth, out bool maxDepthHit)
         //static bool findAPathHash(List<Node> nextOptions, List<Node> goalStateNodes, Dictionary<int, List<Node>> visitedNodesDict, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS, int maxDepth)
         {
             Node currentNode = new Node(nextOptions[0].myState, null);
@@ -664,23 +792,41 @@ namespace Rubiks
             Node nextNode = new Node(goalStateNode.myState, null);
             List<Node> sortList;
             List<Node> minList;
+            List<Node> maxGList;
+            maxDepthHit = false;
+            // TODO:  Sometimes I get caught picking nodes that exceed maxDepth while there 
+            // instead of returning on line 824, I should remove from nextoptions and continue
+            // AND visited nodes not working too
+
             while (nextOptions.Count > 0)
             {
 
                 // VERY SLOW. KEEP RESORTING EVERYTIME
                 // Query for lowest cost, use lowest heuristic as tiebreaker?
-                //List<Node> sortList = nextOptions.OrderBy(o => o.f).ThenBy(m => m.h).ThenBy(n => n.g).ToList();
+                //sortList = nextOptions.OrderBy(o => o.f).ThenBy(m => m.h).ToList();
 
-                int minF = nextOptions.Min(entry => entry.f);
-                minList = nextOptions.Where(entry => entry.f == minF).ToList<Node>();
+                // Only select items at this level.  The visitedNodes will prevent them from being reselected in future iterations.
+                int maxG = nextOptions.Max(entry => entry.g);
+                maxGList = nextOptions.Where(entry => entry.g <= maxDepth).ToList<Node>();
+                
+                if (maxGList.Count == 0)
+                {
+                    maxDepthHit = true;
+                    return false;
+                }
+
+                int minF = maxGList.Min(entry => entry.f);
+                minList = maxGList.Where(entry => entry.f == minF).ToList<Node>();
+
+                //int minF = nextOptions.Min(entry => entry.f);
+                //minList = nextOptions.Where(entry => entry.f == minF).ToList<Node>();
 
                 // Tie breaker?
                 int minH = minList.Min(entry => entry.h);
                 minList = minList.Where(entry => entry.h == minH).ToList<Node>();
-                
+
                 sortList = minList;
 
-                    
                 // Get the best option of the nextOptions.
                 // If there is no other options, no solution found.
                 if (sortList[0] != null)
@@ -689,13 +835,13 @@ namespace Rubiks
                 }
                 else
                 {
+                    maxDepthHit = true;
                     return false;
-                }            
+                }
 
-                if (currentNode.g > maxDepth)
+                if (currentNode.f > cost)
                 {
-                    nextOptions.Remove(currentNode);
-                    continue;
+                    return false;
                 }
 
                 // Check the Dictionary/Hash if node has been visited.
@@ -714,15 +860,26 @@ namespace Rubiks
                 {
                     visitedNodesDict[currentNode.Matches(currentNode.goalStateNode)] = new List<Node>();
                 }
-            
+
+                //List<Node> L;
+                //try
+                //{
+                //    visitedNodesDict.TryGetValue(currentNode.Matches(currentNode.goalStateNode), out L);
+                //}
+                //catch
+                //{
+                //    continue;
+                //}
+
                 if (!visitedNodesDict[currentNode.Matches(currentNode.goalStateNode)].Contains(currentNode))
                 {
+
                     visitedNodesDict[currentNode.Matches(currentNode.goalStateNode)].Add(currentNode);
                     //visitedNodes.Add(currentNode);
 
                     Thread.Sleep(refreshDelayMS);
                     Console.Clear();
-                    Console.WriteLine("Investigating Depth: " + maxDepth);
+                    Console.WriteLine("Investigating Cost: " + currentNode.f);
 
                     //foreach (Node goalStateNode in goalStateNodes)
                     //{
@@ -749,6 +906,7 @@ namespace Rubiks
                         {
                             if (currentNode.childNodes == null)
                             {
+                                currentNode.divideHeuristic = valueDivideHeuristic;
                                 currentNode.childNodes = currentNode.findEligibleChildren(patternDB);
                             }
 
@@ -796,16 +954,16 @@ namespace Rubiks
 
                             // Remove visited childNodes as repeatable options.
                             // Do I need this?
-                            foreach (KeyValuePair<int, List<Node>> pair in visitedNodesDict)
-                            { 
-                                foreach (Node n in pair.Value)
-                                {
-                                    if (otherChildNodes.Contains(n))
-                                    {
-                                        otherChildNodes.Remove(n);
-                                    }
-                                }
-                            }
+                            //foreach (KeyValuePair<int, List<Node>> pair in visitedNodesDict)
+                            //{ 
+                            //    foreach (Node n in pair.Value)
+                            //    {
+                            //        if (otherChildNodes.Contains(n))
+                            //        {
+                            //            otherChildNodes.Remove(n);
+                            //        }
+                            //    }
+                            //}
 
                             // Update any recalculated otherChildNodes into the nextOption list.
                             foreach (Node n in otherChildNodes)
@@ -815,10 +973,10 @@ namespace Rubiks
                                     nextOptions.Remove(n);
                                 }
 
-                                if (n.g <= maxDepth)
-                                {
+                                //if (n.g <= maxDepth)
+                                //{
                                     nextOptions.Add(n);
-                                }                            
+                                //}                            
                             }
 
                             //return false;
@@ -830,17 +988,17 @@ namespace Rubiks
                 }
                 else
                 {
-                    nextOptions.Remove(currentNode);
-                    if (nextOptions != null)
-                    {
-                        //sortList = nextOptions.OrderBy(o => o.f).ToList();
-                        //findAPathHash(nextOptions, goalStateNodes, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS, maxDepth);
-                        //return false;
-                    }
-                    else
-                    {
-                        //return false;
-                    }
+                     nextOptions.Remove(currentNode);
+                    //if (nextOptions != null)
+                    //{
+                    //    //sortList = nextOptions.OrderBy(o => o.f).ToList();
+                    //    //findAPathHash(nextOptions, goalStateNodes, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS, maxDepth);
+                    //    //return false;
+                    //}
+                    //else
+                    //{
+                    //    //return false;
+                    //}
                 }
             }
             
@@ -1406,22 +1564,5 @@ namespace Rubiks
 
         }
 
-        static void Display(List<List<char>> list)
-        {
-            //
-            // Display everything in the List.
-            //
-            Console.WriteLine("Board:");
-            foreach (var sublist in list)
-            {
-                foreach (var value in sublist)
-                {
-                    Console.Write(value);
-                    Console.Write(' ');
-                }
-                Console.WriteLine();
-            }
-
-        }
     }
 }
