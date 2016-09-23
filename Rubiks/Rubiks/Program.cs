@@ -61,13 +61,14 @@ namespace Rubiks
                 Console.WriteLine("What algorithm do you want to run? (1-2)");
                 Console.WriteLine("1 Iterative Deepening A* with No Rotational Invariance");
                 Console.WriteLine("2 Iterative Deepening A* with Rotational Invariance");
+                Console.WriteLine("3 A* with Recursion");
                 
                 algorithm = Console.ReadLine(); // Read string from console
                 if (int.TryParse(algorithm, out valueAlg)) // Try to parse the string as an integer
                 {
-                    if (valueAlg < 0 && valueAlg > 2)
+                    if (valueAlg < 0 && valueAlg > 3)
                     {
-                        Console.WriteLine("Please enter value between 1 and 2!");
+                        Console.WriteLine("Please enter value between 1 and 3!");
                         continue;
                     }
                     else
@@ -82,7 +83,7 @@ namespace Rubiks
 
             }
 
-            if (valueAlg == 1)
+            if (valueAlg == 1 || valueAlg == 3)
             {
                 rotationalInvariance = false;
             }
@@ -128,6 +129,8 @@ namespace Rubiks
                 }
             }
 
+            if (valueAlg != 3)
+            {
             string depth = "";
             int valueDepth = 0;
             keepAsking = true;
@@ -156,6 +159,8 @@ namespace Rubiks
             }
 
             userDefinedDepth = valueDepth;
+
+            }
 
             string heuristic = "";
             int valueDivideHeuristic = 0;
@@ -380,25 +385,30 @@ namespace Rubiks
             if (!rotationalInvariance) {                 
                 goalStateNodes.Clear();
                 goalStateNodes.Add(endGoalNode);
-                //found = findAPath(currentGeneration, endGoalNode, visitedNodes, pathToGoalState, otherChildNodes, refreshDelayMS);
-
-                visitedNodesHash.TryAdd(startStateNode.Matches(endGoalNode), new List<Node>());
-
-                // Log start of search
-                start = DateTime.Now;
-                Console.WriteLine("Search started: " + start);
-                int f = 0;
-                maxDepth = userDefinedDepth;
-                while (!found)
+                if (valueAlg == 3)
                 {
-                    //if (d > maxDepth)
-                    if (maxDepthHit)
-                    {
-                        break;
-                    }
+                    found = findAPath(currentGeneration, endGoalNode, visitedNodes, pathToGoalState, otherChildNodes, refreshDelayMS, valueDivideHeuristic);
+                }
+                else
+                {
+                    visitedNodesHash.TryAdd(startStateNode.Matches(endGoalNode), new List<Node>());
 
-                    found = findAPathHash(currentGeneration, endGoalNode, visitedNodesHash, pathToGoalState, otherChildNodes, refreshDelayMS, f, patternDB, valueDivideHeuristic, maxDepth, out maxDepthHit);
-                    f++;
+                    // Log start of search
+                    start = DateTime.Now;
+                    Console.WriteLine("Search started: " + start);
+                    int f = 0;
+                    maxDepth = userDefinedDepth;
+                    while (!found)
+                    {
+                        //if (d > maxDepth)
+                        if (maxDepthHit)
+                        {
+                            break;
+                        }
+
+                        found = findAPathHash(currentGeneration, endGoalNode, visitedNodesHash, pathToGoalState, otherChildNodes, refreshDelayMS, f, patternDB, valueDivideHeuristic, maxDepth, out maxDepthHit);
+                        f++;
+                    }
                 }
             }
             else { 
@@ -588,6 +598,13 @@ namespace Rubiks
                 Console.WriteLine("Search Ended: " + end);
                 Console.WriteLine("Duration: " + (end - start));
                 Console.WriteLine("Divided Heuristic by: " + valueDivideHeuristic);
+                if (valueAlg == 3)
+                {
+                    int nodesVisited = visitedNodes.Count();
+                    Console.WriteLine("Nodes visited: " + nodesVisited);
+                }
+                else
+                {
                 int nodesVisited = 0;
                 foreach (KeyValuePair<int, List<Node>> pair in visitedNodesHash)
                 {
@@ -595,6 +612,8 @@ namespace Rubiks
                 }
                 
                 Console.WriteLine("Nodes visited: " + nodesVisited);
+                }
+                
                 Console.WriteLine("Nodes in final path: " + pathToGoalState.Count());
                 Console.WriteLine("Cost of final path: " + pathToGoalState[pathToGoalState.Count - 1].f);
                 foreach (Node n in pathToGoalState)
@@ -638,7 +657,13 @@ namespace Rubiks
                 Console.WriteLine("Search Ended: " + end);
                 Console.WriteLine("Duration: " + (end - start));
                 Console.WriteLine("Divided Heuristic by: " + valueDivideHeuristic);
-
+                if (valueAlg == 3)
+                {
+                    int nodesVisited = visitedNodes.Count();
+                    Console.WriteLine("Nodes visited: " + nodesVisited);
+                }
+                else
+                {
                 int nodesVisited = 0;
                     foreach (KeyValuePair<int, List<Node>> pair in visitedNodesHash)
                     {
@@ -646,15 +671,20 @@ namespace Rubiks
                     }
                 
                 Console.WriteLine("Nodes visited: " + nodesVisited);
+                }
                 Console.WriteLine("****************************************************************");
             }
 
-            Console.WriteLine("Press anykey to quit");
-            Console.ReadKey();
+            //Console.WriteLine("Press anykey to quit");
+            //Console.ReadKey();
+            do
+            {
+                Console.WriteLine("Press q to quit");
+            } while (Console.ReadKey().KeyChar != 'q');
             
         }
 
-        static bool findAPath(List<Node> nextOptions, Node goalStateNode, List<Node> visitedNodes, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS)
+        static bool findAPath(List<Node> nextOptions, Node goalStateNode, List<Node> visitedNodes, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS, int valueDivideHeuristic)
         {
             // HERE
             Node currentNode = new Node(nextOptions[0].myState, null);
@@ -704,6 +734,7 @@ namespace Rubiks
                 {
                     if (currentNode.childNodes == null)
                     {
+                        currentNode.divideHeuristic = valueDivideHeuristic;
                         currentNode.childNodes = currentNode.findEligibleChildrenOrig();
                     }
 
@@ -761,7 +792,7 @@ namespace Rubiks
                         nextOptions.Add(n);
                     }
 
-                    findAPath(nextOptions, goalStateNode, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
+                    findAPath(nextOptions, goalStateNode, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS, valueDivideHeuristic);
 
                 }
 
@@ -772,7 +803,7 @@ namespace Rubiks
                 if (nextOptions != null)
                 {
                     //sortList = nextOptions.OrderBy(o => o.f).ToList();
-                    findAPath(nextOptions, goalStateNode, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
+                    findAPath(nextOptions, goalStateNode, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS, valueDivideHeuristic);
                 }
                 else
                 {
@@ -952,21 +983,35 @@ namespace Rubiks
                             }
                             nextOptions.Remove(currentNode);
 
-                            // Remove visited childNodes as repeatable options.
-                            // Do I need this?
-                            //foreach (KeyValuePair<int, List<Node>> pair in visitedNodesDict)
-                            //{ 
-                            //    foreach (Node n in pair.Value)
-                            //    {
-                            //        if (otherChildNodes.Contains(n))
-                            //        {
-                            //            otherChildNodes.Remove(n);
-                            //        }
-                            //    }
-                            //}
+                        // Remove visited childNodes as repeatable options.
+                        // Do I need this?
+                        //foreach (KeyValuePair<int, List<Node>> pair in visitedNodesDict)
+                        //{
+                        //    foreach (Node n in pair.Value)
+                        //    {
+                        //        if (otherChildNodes.Contains(n))
+                        //        {
+                        //            otherChildNodes.Remove(n);
+                        //        }
+                        //    }
+                        //}
 
-                            // Update any recalculated otherChildNodes into the nextOption list.
-                            foreach (Node n in otherChildNodes)
+                        // Remove any childNodes from the list if it's already visited
+                        for (int x = 0; x < otherChildNodes.Count; x++)
+                        //foreach (Node n in otherChildNodes)
+                        {
+                            if (visitedNodesDict.ContainsKey(otherChildNodes[x].Matches(goalStateNode)))
+                            {
+                                List<Node> tmpList = visitedNodesDict[otherChildNodes[x].Matches(goalStateNode)];
+                                if (tmpList.Contains(otherChildNodes[x]))
+                                {
+                                    otherChildNodes.Remove(otherChildNodes[x]);
+                                }
+                            }
+                        }
+
+                        // Update any recalculated otherChildNodes into the nextOption list.
+                        foreach (Node n in otherChildNodes)
                             {
                                 if (nextOptions.Contains(n))
                                 {
