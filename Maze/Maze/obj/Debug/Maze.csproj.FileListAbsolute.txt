@@ -19,3 +19,5 @@ I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\CS440-HW1-Greedy\CS440-HW1-Gr
 I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\CS440-HW1-Greedy\CS440-HW1-Greedy\Maze\Maze\bin\Debug\Maze.exe
 I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\CS440-HW1-Greedy\CS440-HW1-Greedy\Maze\Maze\bin\Debug\Maze.pdb
 I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\CS440-HW1-Greedy\CS440-HW1-Greedy\Maze\Maze\obj\Debug\Maze.csprojResolveAssemblyReference.cache
+C:\Users\mingyili\Documents\GitHub\NewCS440-HW1\CS440-HW1\Maze\Maze\bin\Debug\Maze.exe.config
+C:\Users\mingyili\Documents\GitHub\NewCS440-HW1\CS440-HW1\Maze\Maze\obj\Debug\Maze.pdb
