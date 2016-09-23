@@ -10,3 +10,9 @@ I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\Rubiks\Rubiks\obj\Debug\Rubik
 I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\Rubiks\Rubiks\bin\Debug\Rubiks.exe
 I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\Rubiks\Rubiks\bin\Debug\Rubiks.pdb
 I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\Rubiks\Rubiks\obj\Debug\Rubiks.csprojResolveAssemblyReference.cache
+C:\Users\mingyili\Documents\GitHub\NewCS440-HW1\CS440-HW1\Rubiks\Rubiks\bin\Debug\Rubiks.exe.config
+C:\Users\mingyili\Documents\GitHub\NewCS440-HW1\CS440-HW1\Rubiks\Rubiks\obj\Debug\Rubiks.exe
+C:\Users\mingyili\Documents\GitHub\NewCS440-HW1\CS440-HW1\Rubiks\Rubiks\obj\Debug\Rubiks.pdb
+C:\Users\mingyili\Documents\GitHub\NewCS440-HW1\CS440-HW1\Rubiks\Rubiks\bin\Debug\Rubiks.exe
+C:\Users\mingyili\Documents\GitHub\NewCS440-HW1\CS440-HW1\Rubiks\Rubiks\bin\Debug\Rubiks.pdb
+C:\Users\mingyili\Documents\GitHub\NewCS440-HW1\CS440-HW1\Rubiks\Rubiks\obj\Debug\Rubiks.csprojResolveAssemblyReference.cache
