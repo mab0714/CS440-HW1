@@ -21,7 +21,7 @@ namespace Maze
             //{ 
             //    mazeData = "C:\\Users\\mingyili\\Documents\\GitHub\\NewCS440-HW1\\CS440-HW1\\tinySearch.txt";
             //}
-            mazeData = "C:\\Users\\mingyili\\Documents\\GitHub\\NewCS440-HW1\\CS440-HW1\\tinySearch.txt";
+            mazeData = "C:\\Users\\mingyili\\Documents\\GitHub\\NewCS440-HW1\\CS440-HW1\\smallSearch.txt";
             List<List<char>> mazeBoard = new List<List<char>>();
             List<Node> visitedNodes = new List<Node>();
             List<Node> pathToGoalState = new List<Node>();
@@ -276,6 +276,7 @@ namespace Maze
                     mazeBoard.Add(sublist);
                 }
 
+                // sanity check
                 Console.WriteLine("i: " + i);
                 Console.WriteLine("width: " + width);
 
@@ -378,6 +379,38 @@ namespace Maze
                     //}
                 }
 
+                if (found)
+                {
+                    // Display the finalPath backwards
+                    pathToGoalState.Reverse();
+                    foreach (Node n in pathToGoalState)
+                    {
+                        n.showNodeInfo();
+                    }
+
+                    Console.WriteLine("****************");
+                    Console.WriteLine("Summary: ");
+                    //Console.WriteLine("Search Started: " + start);
+                    //Console.WriteLine("Search Ended: " + end);
+                    //Console.WriteLine("Duration: " + (end - start));
+                    Console.WriteLine("Nodes visited: " + visitedNodes.Count());
+                    Console.WriteLine("Nodes in final path: " + pathToGoalState.Count());
+                    Console.WriteLine("Cost of final path: " + pathToGoalState[pathToGoalState.Count - 1].f);
+                    Console.WriteLine("****************");
+
+                }
+                else
+                {
+                    Console.WriteLine("****************");
+                    Console.WriteLine("Summary: ");
+                    //Console.WriteLine("Search Started: " + start);
+                    //Console.WriteLine("Search Ended: " + end);
+                    //Console.WriteLine("Duration: " + (end - start));
+                    Console.WriteLine("Nodes visited: " + visitedNodes.Count());
+                    Console.WriteLine("****************");
+                }
+
+                Console.WriteLine("Press anykey to quit");
                 Console.ReadKey();
             }
         }
@@ -467,6 +500,7 @@ namespace Maze
                 }
                 else
                 {
+                    bool xxx = (goalList.Contains(currentNode) && (currNums < goalNums));
                     if (goalList.Contains(currentNode) && (currNums < goalNums))
                     {
                         currNums++;

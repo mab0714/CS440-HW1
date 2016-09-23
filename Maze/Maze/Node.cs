@@ -139,13 +139,10 @@ namespace Maze
             int curSum = 0;
             foreach(Node node in goalList)
             {
-                if(curSum > furthest)
+                curSum = Math.Abs(x-node.x)+Math.Abs(y-node.y);
+                if (curSum > furthest)
                 {
                     furthest = curSum;
-                }
-                else
-                {
-                    curSum = Math.Abs(x-node.x)+Math.Abs(y-node.y);
                 }
             }
             furthest = furthest + goalList.Count - 1;
