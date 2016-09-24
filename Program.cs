@@ -21,7 +21,7 @@ namespace Maze
             //{ 
             //    mazeData = "C:\\Users\\mingyili\\Documents\\GitHub\\NewCS440-HW1\\CS440-HW1\\tinySearch.txt";
             //}
-            mazeData = "E:\\Softwares\\Visual Studio 2010\\Projects\\ECE448_HW1\\ECE448_AI_HW1\\ECE448_AI_HW1\\tinySearch.txt";
+            mazeData = "E:\\Softwares\\Visual Studio 2010\\Projects\\ECE448_HW1\\ECE448_AI_HW1\\ECE448_AI_HW1\\smallSearch.txt";
             List<List<char>> mazeBoard = new List<List<char>>();
             List<Node> visitedNodes = new List<Node>();
             List<Node> pathToGoalState = new List<Node>();
@@ -442,7 +442,7 @@ namespace Maze
                 visitedNodes.Add(currentNode);
 
                 // Update on the board
-                //mazeBoard[currentNode.y][currentNode.x] = 'v';
+                mazeBoard[currentNode.y][currentNode.x] = 'v';
 
                 // Show previous board on console for a few seconds before updating
                 Thread.Sleep(refreshDelayMS);
@@ -466,7 +466,7 @@ namespace Maze
                     tempGoalList.Remove(currentNode);               
                 }
 
-                if (goalList.Contains(currentNode)/* && (goalNums == currNums)*/)
+                if (/*goalList.Contains(currentNode) &&*/ (goalNums == currNums))
                 {
                     // I'm done.  Calculate my finalPathOfNodes by backtracking from my currentNode to the node which has no parent (root)
                     finalPathOfNodes.Clear();
@@ -475,9 +475,9 @@ namespace Maze
                     //int i = 0;
                     Node tmpNode = new Node(currentNode.x, currentNode.y, currentNode.parentNode);
                     // Mark paths with '.'
-                    //while (tmpNode.parentNode != null)
-                    Node tempNode = new Node(4, 4, null);
-                    while (!goalList.Contains(tmpNode.parentNode) && !tempNode.parentNode.Equals(tempNode))
+                    while (tmpNode.parentNode != null)
+                    //Node tempNode = new Node(4, 4, null);
+                    //while (!goalList.Contains(tmpNode.parentNode) && !tempNode.parentNode.Equals(tempNode))
                     {
 
                         //mazeBoard[tmpNode.y][tmpNode.x] = '.';
