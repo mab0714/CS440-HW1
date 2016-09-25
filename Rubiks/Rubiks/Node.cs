@@ -15,6 +15,9 @@ namespace Rubiks
         List<List<char>> _myState;
         List<List<char>> _goalState;
 
+        // Heuristic divider
+        private int _valueDivideHeuristic = 1;
+
         // Cost variables
         private int _h;
         private int _g;
@@ -37,7 +40,7 @@ namespace Rubiks
         //    this._y = y;
         //    this._parentNode = parentNode;
         //    this._isInitialized = true;
-        //}
+        //}                 
 
         public Node(List<List<char>> myState, Node parentNode)
         {
@@ -51,6 +54,12 @@ namespace Rubiks
         {
             get { return this._myState; }
             set { this._myState = value; }
+        }
+
+        public int divideHeuristic
+        {
+            get { return this._valueDivideHeuristic; }
+            set { this._valueDivideHeuristic = value; }
         }
         public List<List<char>> goalState
         {
@@ -102,7 +111,7 @@ namespace Rubiks
         }
         public bool Equals(Node n)
         {
-         
+
             string myState = "";
             string tmpState = "";
 
@@ -111,7 +120,7 @@ namespace Rubiks
                 foreach (char c in l)
                 {
                     myState += c;
-                }                
+                }
             }
             foreach (List<char> l in n.myState)
             {
@@ -135,9 +144,22 @@ namespace Rubiks
             }
         }
 
+        public String myStateString()
+        {
+            string temp = "";
+            foreach (List<char> l in this._myState)
+            {
+                foreach (char c in l)
+                {
+                    temp += c;
+                }
+            }
+            return temp;
+        }
+
         // How many matches does the current state have with goalState.  
         // Don't need input if always comparing goalState, but for flexibility, leaving goalState as input.
-        public int Matches (Node n)
+        public int Matches(Node n)
         {
             int i = 0;
             int j = 0;
@@ -149,7 +171,7 @@ namespace Rubiks
                 foreach (char c in l)
                 {
                     //Console.Write(this.myState[i][j] + " " + n.myState[i][j]);
-                    if (this.myState[i][j] == n.myState[i][j]  && !this.myState[i][j].ToString().Trim().Equals("") && !n.myState[i][j].ToString().Trim().Equals(""))
+                    if (this.myState[i][j] == n.myState[i][j] && !this.myState[i][j].ToString().Trim().Equals("") && !n.myState[i][j].ToString().Trim().Equals(""))
                     {
                         cnt++;
                     }
@@ -162,7 +184,7 @@ namespace Rubiks
         }
 
         public int CornerMatches(Node n)
-        {            
+        {
             int cnt = 0;
 
             // LeftMatches            
@@ -730,7 +752,7 @@ namespace Rubiks
             return _childNodes;
         }
 
-        public List<Node> findEligibleChildren(Dictionary<List<List<char>>, int> patternDB)
+        public List<Node> findEligibleChildren(Dictionary<String, int> patternDB)
         {
             Node tmpNode;
             // initialize child nodes
@@ -739,7 +761,7 @@ namespace Rubiks
                 _childNodes = new List<Node>();
             }
 
-            double divideBy = 4.0;
+            int h;
 
             // get a copy of the current state
             List<List<char>> newState = CopyState();
@@ -767,15 +789,23 @@ namespace Rubiks
             tmpNode = new Node(newState, this);
             tmpNode.Move = "T";
             tmpNode.g = tmpNode._parentNode.g + 1;
-            try
+            if (patternDB.Count > 0)
             {
-                tmpNode.h = 24 - patternDB[myState];
+                try
+                {
+                    patternDB.TryGetValue(this.myStateString(), out h);
+                    tmpNode.h = 24 - h;
+                }
+                catch
+                {
+                    tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
+                }
             }
-            catch
+            else
             {
                 tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
             }
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / divideBy);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -803,15 +833,29 @@ namespace Rubiks
             tmpNode = new Node(newState, this);
             tmpNode.Move = "T'";
             tmpNode.g = tmpNode._parentNode.g + 1;
-            try
+            //try
+            //{
+            //    int h = 0;
+            //    patternDB.TryGetValue(myState, out h);
+            //    tmpNode.h = 24 - h;
+            //}
+            if (patternDB.Count > 0)
             {
-                tmpNode.h = 24 - patternDB[myState];
+                try
+                {
+                    patternDB.TryGetValue(this.myStateString(), out h);
+                    tmpNode.h = 24 - h;
+                }
+                catch
+                {
+                    tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
+                }
             }
-            catch
+            else
             {
                 tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
             }
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / divideBy);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -839,15 +883,23 @@ namespace Rubiks
             tmpNode = new Node(newState, this);
             tmpNode.Move = "Bo";
             tmpNode.g = tmpNode._parentNode.g + 1;
-            try
+            if (patternDB.Count > 0)
             {
-                tmpNode.h = 24 - patternDB[myState];
+                try
+                {
+                    patternDB.TryGetValue(this.myStateString(), out h);
+                    tmpNode.h = 24 - h;
+                }
+                catch
+                {
+                    tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
+                }
             }
-            catch
+            else
             {
                 tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
             }
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / divideBy);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -875,15 +927,23 @@ namespace Rubiks
             tmpNode = new Node(newState, this);
             tmpNode.Move = "Bo'";
             tmpNode.g = tmpNode._parentNode.g + 1;
-            try
+            if (patternDB.Count > 0)
             {
-                tmpNode.h = 24 - patternDB[myState];
+                try
+                {
+                    patternDB.TryGetValue(this.myStateString(), out h);
+                    tmpNode.h = 24 - h;
+                }
+                catch
+                {
+                    tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
+                }
             }
-            catch
+            else
             {
                 tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
             }
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / divideBy);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -911,15 +971,23 @@ namespace Rubiks
             tmpNode = new Node(newState, this);
             tmpNode.Move = "F";
             tmpNode.g = tmpNode._parentNode.g + 1;
-            try
+            if (patternDB.Count > 0)
             {
-                tmpNode.h = 24 - patternDB[myState];
+                try
+                {
+                    patternDB.TryGetValue(this.myStateString(), out h);
+                    tmpNode.h = 24 - h;
+                }
+                catch
+                {
+                    tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
+                }
             }
-            catch
+            else
             {
                 tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
             }
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / divideBy);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -947,15 +1015,23 @@ namespace Rubiks
             tmpNode = new Node(newState, this);
             tmpNode.Move = "F'";
             tmpNode.g = tmpNode._parentNode.g + 1;
-            try
+            if (patternDB.Count > 0)
             {
-                tmpNode.h = 24 - patternDB[myState];
+                try
+                {
+                    patternDB.TryGetValue(this.myStateString(), out h);
+                    tmpNode.h = 24 - h;
+                }
+                catch
+                {
+                    tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
+                }
             }
-            catch
+            else
             {
                 tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
             }
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / divideBy);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -983,15 +1059,23 @@ namespace Rubiks
             tmpNode = new Node(newState, this);
             tmpNode.Move = "Ba";
             tmpNode.g = tmpNode._parentNode.g + 1;
-            try
+            if (patternDB.Count > 0)
             {
-                tmpNode.h = 24 - patternDB[myState];
+                try
+                {
+                    patternDB.TryGetValue(this.myStateString(), out h);
+                    tmpNode.h = 24 - h;
+                }
+                catch
+                {
+                    tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
+                }
             }
-            catch
+            else
             {
                 tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
             }
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / divideBy);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1019,15 +1103,23 @@ namespace Rubiks
             tmpNode = new Node(newState, this);
             tmpNode.Move = "Ba'";
             tmpNode.g = tmpNode._parentNode.g + 1;
-            try
+            if (patternDB.Count > 0)
             {
-                tmpNode.h = 24 - patternDB[myState];
+                try
+                {
+                    patternDB.TryGetValue(this.myStateString(), out h);
+                    tmpNode.h = 24 - h;
+                }
+                catch
+                {
+                    tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
+                }
             }
-            catch
+            else
             {
                 tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
             }
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / divideBy);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1055,15 +1147,23 @@ namespace Rubiks
             tmpNode = new Node(newState, this);
             tmpNode.Move = "L";
             tmpNode.g = tmpNode._parentNode.g + 1;
-            try
+            if (patternDB.Count > 0)
             {
-                tmpNode.h = 24 - patternDB[myState];
+                try
+                {
+                    patternDB.TryGetValue(this.myStateString(), out h);
+                    tmpNode.h = 24 - h;
+                }
+                catch
+                {
+                    tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
+                }
             }
-            catch
+            else
             {
                 tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
             }
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / divideBy);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1091,15 +1191,23 @@ namespace Rubiks
             tmpNode = new Node(newState, this);
             tmpNode.Move = "L'";
             tmpNode.g = tmpNode._parentNode.g + 1;
-            try
+            if (patternDB.Count > 0)
             {
-                tmpNode.h = 24 - patternDB[myState];
+                try
+                {
+                    patternDB.TryGetValue(this.myStateString(), out h);
+                    tmpNode.h = 24 - h;
+                }
+                catch
+                {
+                    tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
+                }
             }
-            catch
+            else
             {
                 tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
             }
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / divideBy);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1127,16 +1235,25 @@ namespace Rubiks
             tmpNode = new Node(newState, this);
             tmpNode.Move = "R";
             tmpNode.g = tmpNode._parentNode.g + 1;
-            try
+            if (patternDB.Count > 0)
             {
-                tmpNode.h = 24 - patternDB[myState];
+                try
+                {
+                    patternDB.TryGetValue(this.myStateString(), out h);
+                    tmpNode.h = 24 - h;
+                }
+                catch
+                {
+                    tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
+                }
             }
-            catch
+            else
             {
                 tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
             }
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / divideBy);
-            tmpNode.f = tmpNode.g + tmpNode.h; tmpNode.goalStateNode = _goalStateNode;
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
+            tmpNode.f = tmpNode.g + tmpNode.h;
+            tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
 
             newState = CopyState();
@@ -1162,16 +1279,26 @@ namespace Rubiks
             tmpNode = new Node(newState, this);
             tmpNode.Move = "R'";
             tmpNode.g = tmpNode._parentNode.g + 1;
-            try
+            if (patternDB.Count > 0)
             {
-                tmpNode.h = 24 - patternDB[myState];
+                try
+                {
+                    //tmpNode.h = 24 - patternDB[myState];
+                    patternDB.TryGetValue(this.myStateString(), out h);
+                    tmpNode.h = 24 - h;
+                }
+                catch
+                {
+                    tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
+                }
             }
-            catch
+            else
             {
                 tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
             }
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / divideBy);
-            tmpNode.f = tmpNode.g + tmpNode.h; tmpNode.goalStateNode = _goalStateNode;
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
+            tmpNode.f = tmpNode.g + tmpNode.h;
+            tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
 
             if (this._parentNode != null)// && this._childNodes != null)
@@ -1218,7 +1345,7 @@ namespace Rubiks
             tmpNode.Move = "T";
             tmpNode.g = tmpNode._parentNode.g + 1;
             tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / 4.0);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1247,7 +1374,7 @@ namespace Rubiks
             tmpNode.Move = "T'";
             tmpNode.g = tmpNode._parentNode.g + 1;
             tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / 4.0);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1276,7 +1403,7 @@ namespace Rubiks
             tmpNode.Move = "Bo";
             tmpNode.g = tmpNode._parentNode.g + 1;
             tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / 4.0);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1305,7 +1432,7 @@ namespace Rubiks
             tmpNode.Move = "Bo'";
             tmpNode.g = tmpNode._parentNode.g + 1;
             tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / 4.0);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1334,7 +1461,7 @@ namespace Rubiks
             tmpNode.Move = "F";
             tmpNode.g = tmpNode._parentNode.g + 1;
             tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / 4.0);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1363,7 +1490,7 @@ namespace Rubiks
             tmpNode.Move = "F'";
             tmpNode.g = tmpNode._parentNode.g + 1;
             tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / 4.0);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1392,7 +1519,7 @@ namespace Rubiks
             tmpNode.Move = "Ba";
             tmpNode.g = tmpNode._parentNode.g + 1;
             tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / 4.0);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1421,7 +1548,7 @@ namespace Rubiks
             tmpNode.Move = "Ba'";
             tmpNode.g = tmpNode._parentNode.g + 1;
             tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / 4.0);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1450,7 +1577,7 @@ namespace Rubiks
             tmpNode.Move = "L";
             tmpNode.g = tmpNode._parentNode.g + 1;
             tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / 4.0);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1479,7 +1606,7 @@ namespace Rubiks
             tmpNode.Move = "L'";
             tmpNode.g = tmpNode._parentNode.g + 1;
             tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / 4.0);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1508,7 +1635,7 @@ namespace Rubiks
             tmpNode.Move = "R";
             tmpNode.g = tmpNode._parentNode.g + 1;
             tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / 4.0);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1537,7 +1664,7 @@ namespace Rubiks
             tmpNode.Move = "R'";
             tmpNode.g = tmpNode._parentNode.g + 1;
             tmpNode.h = (24 - tmpNode.Matches(_goalStateNode));
-            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / 4.0);
+            tmpNode.h = (int)Math.Ceiling((Double)tmpNode.h / (double)_valueDivideHeuristic);
             tmpNode.f = tmpNode.g + tmpNode.h;
             tmpNode.goalStateNode = _goalStateNode;
             _childNodes.Add(tmpNode);
@@ -1551,14 +1678,14 @@ namespace Rubiks
 
         public List<Node> findEligibleChildren(List<Node> goalStateNodes)
         {
-            Node tmpNode;            
+            Node tmpNode;
             int minH = 2;  // Can't have H > 
             // initialize child nodes
             if (_childNodes == null)
             {
                 _childNodes = new List<Node>();
             }
-            
+
             // get a copy of the current state
             List<List<char>> newState = CopyState();
 
@@ -1582,7 +1709,7 @@ namespace Rubiks
             newState[0][2] = _myState[2][4];
             newState[1][2] = _myState[2][6];
 
-            tmpNode = new Node(newState, this);            
+            tmpNode = new Node(newState, this);
             tmpNode.Move = "T";
             tmpNode.g = tmpNode._parentNode.g + 1;
             tmpNode.h = (12 - tmpNode.CornerMatches(_goalStateNode)) / 12;
@@ -1914,16 +2041,27 @@ namespace Rubiks
             {
                 foreach (char c in l)
                 {
+                    //Console.BackgroundColor = ConsoleColor.Black;
+                    if (c.Equals('r')) { Console.BackgroundColor = ConsoleColor.Red; }
+                    else if (c.Equals('y')) { Console.BackgroundColor = ConsoleColor.Yellow; }
+                    else if (c.Equals('o')) { Console.BackgroundColor = ConsoleColor.Magenta; }
+                    else if (c.Equals('p')) { Console.BackgroundColor = ConsoleColor.DarkMagenta; }
+                    else if (c.Equals('b')) { Console.BackgroundColor = ConsoleColor.Blue; }
+                    else if (c.Equals('g')) { Console.BackgroundColor = ConsoleColor.Green; }
+                    //else { Console.BackgroundColor = ConsoleColor.Black; }
                     Console.Write(c);
                 }
+                Console.Write(' ');
                 Console.WriteLine();
+                Console.BackgroundColor = ConsoleColor.Black;
             }
+            Console.BackgroundColor = ConsoleColor.Black;
             Console.WriteLine("Heuristic value: " + this.h);
             Console.WriteLine("******************");
         }
 
     }
 
-   
+
 
 }

@@ -29,6 +29,29 @@ namespace Maze
 
         public bool _isInitialized;
 
+        class endGoalMultiple
+        {
+            private int _dist;
+            private Node _endGoal;
+
+            public endGoalMultiple(int dist, Node endGoal)
+            {
+                this._dist = dist;
+                this._endGoal = endGoal;
+            }
+            public int dist
+            {
+                get { return this._dist; }
+                set { this._dist = value; }
+            }
+            public Node endGoal
+            {
+                get { return this._endGoal; }
+                set { this._endGoal = value; }
+            }
+        }
+        
+
         public Node(int x, int y, Node parentNode)
         {
             this._x = x;
@@ -133,20 +156,26 @@ namespace Maze
             return z;
         }
 
-        private int calcHvalueMultiple(int x, int y, List<Node> goalList)
+        private endGoalMultiple calcHvalueMultiple(int x, int y, List<Node> goalList)
         {
-            int furthest = 0;
-            int curSum = 0;
+            int closestDist = 0;
+            int curDist = 0;
+            Node tmpGoal = new Node(0,0,null);
+
+            endGoalMultiple bestGoal = new endGoalMultiple(0, tmpGoal);
             foreach(Node node in goalList)
             {
-                curSum = Math.Abs(x-node.x)+Math.Abs(y-node.y);
-                if (curSum > furthest)
+                curDist = Math.Abs(x-node.x)+Math.Abs(y-node.y);
+                if (curDist < closestDist)
                 {
-                    furthest = curSum;
+                    closestDist = curDist;
+                    tmpGoal = node;
                 }
             }
-            furthest = furthest + goalList.Count - 1;
-            return furthest;
+            bestGoal.dist = closestDist;
+            bestGoal.endGoal = tmpGoal;
+            
+            return bestGoal;
         }
 
         public List<Node> findEligibleChildren(List<List<char>> mazeBoard, List<Node> otherChildNodes)
@@ -371,9 +400,9 @@ namespace Maze
             if (isWalkable(this._x, this._y - 1, mazeBoard))
             {
                 tmpNode.g = tmpNode.parentNode.g + 1;
-                tmpNode.h = calcHvalueMultiple(this._x, this.y - 1, goalList);
+                tmpNode.h = calcHvalueMultiple(this._x, this.y - 1, goalList).dist;
                 tmpNode.f = tmpNode.g + tmpNode.h;
-                // tmpNode.goalStateNode = this.goalStateNode;
+                tmpNode.goalStateNode = calcHvalueMultiple(this._x, this.y - 1, goalList).endGoal;
                 tmpNode._numGoals = this._numGoals;
                 AddChild(tmpNode);
             }
@@ -383,9 +412,9 @@ namespace Maze
             if (isWalkable(this._x + 1, this._y, mazeBoard))
             {
                 tmpNode.g = tmpNode.parentNode.g + 1;
-                tmpNode.h = calcHvalueMultiple(this._x + 1, this._y, goalList);
+                tmpNode.h = calcHvalueMultiple(this._x + 1, this._y, goalList).dist;
                 tmpNode.f = tmpNode.g + tmpNode.h;
-                // tmpNode.goalStateNode = this.goalStateNode;
+                tmpNode.goalStateNode = calcHvalueMultiple(this._x + 1, this._y, goalList).endGoal;
                 tmpNode._numGoals = this._numGoals;
                 AddChild(tmpNode);
             }
@@ -395,9 +424,9 @@ namespace Maze
             if (isWalkable(this._x, this._y + 1, mazeBoard))
             {
                 tmpNode.g = tmpNode.parentNode.g + 1;
-                tmpNode.h = calcHvalueMultiple(this._x, this._y + 1, goalList);
+                tmpNode.h = calcHvalueMultiple(this._x, this._y + 1, goalList).dist;
                 tmpNode.f = tmpNode.g + tmpNode.h;
-                // tmpNode.goalStateNode = this.goalStateNode;
+                tmpNode.goalStateNode = calcHvalueMultiple(this._x, this._y + 1, goalList).endGoal;
                 tmpNode._numGoals = this._numGoals;
                 AddChild(tmpNode);
             }
@@ -407,9 +436,9 @@ namespace Maze
             if (isWalkable(this._x - 1, this._y, mazeBoard))
             {
                 tmpNode.g = tmpNode.parentNode.g + 1;
-                tmpNode.h = calcHvalueMultiple(this._x - 1, this._y, goalList);
+                tmpNode.h = calcHvalueMultiple(this._x - 1, this._y, goalList).dist;
                 tmpNode.f = tmpNode.g + tmpNode.h;
-                // tmpNode.goalStateNode = this.goalStateNode;
+                tmpNode.goalStateNode = calcHvalueMultiple(this._x, this._y + 1, goalList).endGoal;
                 tmpNode._numGoals = this._numGoals;
                 AddChild(tmpNode);
             }

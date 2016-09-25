@@ -2,6 +2,6 @@
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartAction>Project</StartAction>
-    <StartArguments>I:\Backup\Masters\UIUC\2016\Fall\CS_440\Homework\1\CS440-HW1-Greedy\CS440-HW1-Greedy\openMaze.txt</StartArguments>
+    <StartArguments>C:\Users\mingyili\Documents\GitHub\NewCS440-HW1\CS440-HW1\Maze\tinySearch.txt</StartArguments>
   </PropertyGroup>
 </Project>

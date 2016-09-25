@@ -13,15 +13,15 @@ namespace Maze
         static void Main(string[] args)
         {
             string mazeData = "";
-            //if (args[0] != null)
-            //{
-            //    mazeData = args[0];
-            //}
-            //else
-            //{ 
-            //    mazeData = "C:\\Users\\mingyili\\Documents\\GitHub\\NewCS440-HW1\\CS440-HW1\\tinySearch.txt";
-            //}
-            mazeData = "C:\\Users\\mingyili\\Documents\\GitHub\\NewCS440-HW1\\CS440-HW1\\smallSearch.txt";
+            if (args[0] != null)
+            {
+                mazeData = args[0];
+            }
+            else
+            {
+                mazeData = "C:\\Users\\mingyili\\Documents\\GitHub\\NewCS440-HW1\\CS440-HW1\\Maze\\tinySearch.txt";
+            }
+            // mazeData = "C:\\Users\\mingyili\\Documents\\GitHub\\NewCS440-HW1\\CS440-HW1\\smallSearch.txt";
             List<List<char>> mazeBoard = new List<List<char>>();
             List<Node> visitedNodes = new List<Node>();
             List<Node> pathToGoalState = new List<Node>();
@@ -241,15 +241,16 @@ namespace Maze
                 int intStartX = 0;
                 int intStartY = 0;
                 List<Node> goalList = new List<Node>();
-                int goalNums = 0;
                 int currNums = 0;
+                int goalNums = 0;
 
+                // for sanity checks
                 int i = 0;
                 int j = 0;
                 int width = 0;
 
+                // read input file and 
                 string[] lines = System.IO.File.ReadAllLines(@mazeData);
-
                 foreach (string line in lines)
                 {
                     i++;
@@ -279,6 +280,13 @@ namespace Maze
                 // sanity check
                 Console.WriteLine("i: " + i);
                 Console.WriteLine("width: " + width);
+                Display(mazeBoard);
+                Console.WriteLine("Total goals:" + goalNums);
+                Console.WriteLine("All the goals:");
+                foreach (Node node in goalList)
+                {
+                    Console.Write("(" + node.y + "," + node.x + ")\n");
+                }
 
                 /*
                 // create 2D array for h values
@@ -320,7 +328,7 @@ namespace Maze
 
                 Thread.Sleep(refreshDelayMS);
                 Console.Clear();
-                Display(mazeBoard);
+                
 
                 // Start State
                 Console.WriteLine("Start State:" + intStartX + " " + intStartY + ": " + mazeBoard[intStartY][intStartX]);
@@ -352,7 +360,7 @@ namespace Maze
 
 
                 List<Node> nextOptions = new List<Node>();
-                // Node endGoalNode = new Node(intGoalX, intGoalY, null);
+                Node endGoalNode = new Node(0, 0, null);
                 Node startStateNode = new Node(intStartX, intStartY, null, goalNums);
                 Node currentNode = startStateNode;
                 int tmpDepth = 0;
@@ -433,176 +441,198 @@ namespace Maze
         }
         */
 
+        //    static bool findMultipleCheckAll(int currNums, List<Node> nextOptions, int goalNums, List<List<char>> mazeBoard, List<Node> visitedNodes, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS, int maxDepth)
+        //{
+        //    Node currentNode = new Node(0, 0, null, goalNums);
+        //    Node endNode = new Node(0, 0, null, goalNums);
+
+        //    while(currNums < goalNums)
+        //    {
+        //        if(currentNode.)
+        //    }
+        //}
+
         static bool findPathMultiple(int currNums, List<Node> goalList, List<Node> nextOptions, int goalNums, List<List<char>> mazeBoard, List<Node> visitedNodes, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS, int maxDepth)
         {
-            Node currentNode = new Node(0, 0, null, goalNums);
-            Node nextNode = new Node(0, 0, null, goalNums);
-
+            Node currentNode = new Node(0, 0, null, null);
+            Node nextNode = new Node(0, 0, null, null);
+            Node tmpEndGoal = new Node(0, 0, null);
+            char[] path = { '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
             List<Node> sortList = new List<Node>();
-            sortList = nextOptions.OrderBy(o => o.f).ThenBy(n => n.h).ToList();
-            if (!sortList.Any())
+            while (nextOptions.Count > 0)
             {
-                return false;
-            }
-            currentNode = sortList[0];
-            List<Node> tempGoalList = new List<Node>();
-            tempGoalList = goalList;
+                sortList = nextOptions.OrderBy(o => o.f).ThenBy(n => n.h).ToList();
+                Console.Write("1");
 
-            if (currentNode.g > maxDepth)
-            {
-                return false;
-            }
-
-            // Have I visited this already?
-            if (!visitedNodes.Contains(currentNode))
-            {
-                // Mark as visited
-                visitedNodes.Add(currentNode);
-
-                // Update on the board
-                mazeBoard[currentNode.y][currentNode.x] = 'v';
-
-                // Show previous board on console for a few seconds before updating
-                Thread.Sleep(refreshDelayMS);
-
-                // Now show new mazeBoard
-                Console.Clear();
-                Display(mazeBoard);
-
-                // Check goalState
-                if (/*goalList.Contains(currentNode) && */(goalNums == currNums))
+                if (!sortList.Any())
                 {
-                    // I'm done.  Calculate my finalPathOfNodes by backtracking from my currentNode to the node which has no parent (root)
-                    finalPathOfNodes.Clear();
-                    finalPathOfNodes.Add(currentNode);
-                    char[] path = { '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
-                    int i = 0;
-                    Node tmpNode = new Node(currentNode.x, currentNode.y, currentNode.parentNode);
-                    // Mark paths with '.'
-                    while (tmpNode.parentNode != null)
-                    {
+                    return false;
+                }
+                currentNode = sortList[0];
+                Console.WriteLine("currentNode:" + currentNode.goalStateNode.x + currentNode.goalStateNode.y);
+                Node currBestGoal = currentNode.goalStateNode;
+                //List<Node> tempGoalList = new List<Node>();
+                //tempGoalList = goalList;
 
-                        mazeBoard[tmpNode.y][tmpNode.x] = path[i];
-                        nextNode = tmpNode.parentNode;
-                        finalPathOfNodes.Add(nextNode);
-                        tmpNode = nextNode;
-                        i++;
-                    }
+                if (currentNode.g > maxDepth)
+                {
+                    return false;
+                }
 
-                    // Mark the root as 'P'
-                    mazeBoard[tmpNode.y][tmpNode.x] = 'P';
+                // Have I visited this already?
+                if (!visitedNodes.Contains(currentNode))
+                {
+                    // Mark as visited
+                    visitedNodes.Add(currentNode);
 
-                    // Show maze for a few seconds
+                    // Update on the board
+                    mazeBoard[currentNode.y][currentNode.x] = 'v';
+
+                    // Show previous board on console for a few seconds before updating
                     Thread.Sleep(refreshDelayMS);
+
+                    // Now show new mazeBoard
                     Console.Clear();
                     Display(mazeBoard);
-                    return true;
-                }
-                else
-                {
-                    bool xxx = (goalList.Contains(currentNode) && (currNums < goalNums));
-                    if (goalList.Contains(currentNode) && (currNums < goalNums))
+
+                    Console.WriteLine("CurrentNode: " + currentNode.x + currentNode.y);
+                    Console.WriteLine("currBestGoal: " + currBestGoal.x + currBestGoal.y);
+                    // Check goalState
+                    if (currentNode.Equals(currBestGoal) && (currNums == goalNums))
                     {
-                        currNums++;
-                        goalList.Remove(currentNode);
-
-                    }
-
-                    // Not done, need to do work.
-                    // What can this currentNode add to the Frontier (N,S,E,W)
-                    if (currentNode.childNodes == null)
-                    {
-                        // May need to compare findEligibleChildren with A version (f,g,h changes and in original, I disallow child nodes to be eligible)
-                        currentNode.childNodes = currentNode.findEligibleChildrenAMultiple(mazeBoard, goalList);
-                    }
-
-                    // Show node investigating
-                    currentNode.showNodeInfo();
-
-                    // Are there child nodes?  What can I add to frontier?
-                    if (currentNode.childNodes != null && currentNode.childNodes.Count > 0)
-                    {
-
-                        // Mark childNodes as being already a child to some other parent.
-                        foreach (Node n in currentNode.childNodes)
+                        Console.Write("2");
+                        // I'm done.  Calculate my finalPathOfNodes by backtracking from my currentNode to the node which has no parent (root)
+                        finalPathOfNodes.Clear();
+                        finalPathOfNodes.Add(currentNode);
+                        //int i = 0;
+                        Node tmpNode = new Node(currentNode.x, currentNode.y, currentNode.parentNode);
+                        // Mark paths with '.'
+                        /*
+                        while (tmpNode.parentNode != null)
                         {
-                            // If it doesn't belong to a parent, mark it
-                            if (!otherChildNodes.Contains(n))
-                            {
-                                otherChildNodes.Add(n);
-                            }
-                            else
-                            {
-                                // A* needs to check if a node has a cheaper total path cost.  
-                                if (otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).f > n.f)
-                                {
-                                    // Update parentNode, g, h, f 
-                                    otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).parentNode = currentNode;
-                                    otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).f = n.f;
-                                    otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).g = n.g;
-                                    otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).h = n.h;
-                                    // If it's updated, it may need to be revisited.
-                                    if (visitedNodes.Contains(n))
-                                    {
-                                        visitedNodes.Remove(n);
-                                    }
 
+                            mazeBoard[tmpNode.y][tmpNode.x] = path[i];
+                            nextNode = tmpNode.parentNode;
+                            finalPathOfNodes.Add(nextNode);
+                            tmpNode = nextNode;
+                            i++;
+                        }
+                        */
+
+                        // Mark the root as 'P'
+                        mazeBoard[tmpNode.y][tmpNode.x] = 'P';
+
+                        // Show maze for a few seconds
+                        Thread.Sleep(refreshDelayMS);
+                        Console.Clear();
+                        Display(mazeBoard);
+                        return true;
+                    }
+                    else
+                    {
+                        Console.Write("3");
+                        // bool xxx = (goalList.Contains(currentNode) && (currNums < goalNums));
+                        if (currentNode.Equals(currBestGoal) && (currNums < goalNums))
+                        {
+                            currNums++;
+                            mazeBoard[currentNode.y][currentNode.x] = path[currNums];
+                        }
+
+                        // Not done, need to do work.
+                        // What can this currentNode add to the Frontier (N,S,E,W)
+                        if (currentNode.childNodes == null)
+                        {
+                            // May need to compare findEligibleChildren with A version (f,g,h changes and in original, I disallow child nodes to be eligible)
+                            currentNode.childNodes = currentNode.findEligibleChildrenAMultiple(mazeBoard, goalList);
+                        }
+
+                        // Show node investigating
+                        currentNode.showNodeInfo();
+
+                        // Are there child nodes?  What can I add to frontier?
+                        if (currentNode.childNodes != null && currentNode.childNodes.Count > 0)
+                        {
+
+                            // Mark childNodes as being already a child to some other parent.
+                            foreach (Node n in currentNode.childNodes)
+                            {
+                                // If it doesn't belong to a parent, mark it
+                                if (!otherChildNodes.Contains(n))
+                                {
+                                    otherChildNodes.Add(n);
+                                }
+                                else
+                                {
+                                    // A* needs to check if a node has a cheaper total path cost.  
+                                    if (otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).f > n.f)
+                                    {
+                                        // Update parentNode, g, h, f 
+                                        otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).parentNode = currentNode;
+                                        otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).f = n.f;
+                                        otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).g = n.g;
+                                        otherChildNodes.ElementAt(otherChildNodes.IndexOf(n)).h = n.h;
+                                        // If it's updated, it may need to be revisited.
+                                        if (visitedNodes.Contains(n))
+                                        {
+                                            visitedNodes.Remove(n);
+                                        }
+
+                                    }
                                 }
                             }
                         }
-                    }
 
 
-                    // Remove this node from the Frontier
-                    nextOptions.Remove(currentNode);
+                        // Remove this node from the Frontier
+                        nextOptions.Remove(currentNode);
 
-                    // Remove visited childNodes as repeatable options.
-                    // Is this needed?  Does it hurt?
-                    foreach (Node n in visitedNodes)
-                    {
-                        if (otherChildNodes.Contains(n))
+                        // Remove visited childNodes as repeatable options.
+                        // Is this needed?  Does it hurt?
+                        foreach (Node n in visitedNodes)
                         {
-                            otherChildNodes.Remove(n);
-                        }
-                    }
-
-                    // Add new children to the frontier
-                    // Update any recalculated otherChildNodes into the nextOption list.
-                    foreach (Node n in otherChildNodes)
-                    {
-                        if (nextOptions.Contains(n))
-                        {
-                            nextOptions.Remove(n);
+                            if (otherChildNodes.Contains(n))
+                            {
+                                otherChildNodes.Remove(n);
+                            }
                         }
 
-                        nextOptions.Add(n);
+                        // Add new children to the frontier
+                        // Update any recalculated otherChildNodes into the nextOption list.
+                        foreach (Node n in otherChildNodes)
+                        {
+                            if (nextOptions.Contains(n))
+                            {
+                                nextOptions.Remove(n);
+                            }
+
+                            nextOptions.Add(n);
+                        }
+
+                        //return false;
+                        //findGreedyPath(nextOptions, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
+
                     }
+                }
 
-                    //return false;
-                    //findGreedyPath(nextOptions, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
 
+                else
+                {
+                    // visited already, remove this for Frontier
+                    // don't return to get out of routine.  Move on to next available from our sortedList (Frontier)
+                    sortList.Remove(currentNode);  // don't want to keep checking this in a loop.  Needs to be removed from sortList for next iteration.
+                    nextOptions.Remove(currentNode);  // may not be needed as this section is primarily for moving on to other siblings within this depth.  nextOptions has no impact here.
+
+                    //if (nextOptions != null)
+                    //{
+                    //    sortList = nextOptions.OrderBy(o => o.f).ToList();
+                    //    findGreedyPath(sortList, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
+                    //}
+                    //else
+                    //{
+                    //    return false;
+                    //}
                 }
             }
-
-
-            else
-            {
-                // visited already, remove this for Frontier
-                // don't return to get out of routine.  Move on to next available from our sortedList (Frontier)
-                sortList.Remove(currentNode);  // don't want to keep checking this in a loop.  Needs to be removed from sortList for next iteration.
-                nextOptions.Remove(currentNode);  // may not be needed as this section is primarily for moving on to other siblings within this depth.  nextOptions has no impact here.
-
-                //if (nextOptions != null)
-                //{
-                //    sortList = nextOptions.OrderBy(o => o.f).ToList();
-                //    findGreedyPath(sortList, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
-                //}
-                //else
-                //{
-                //    return false;
-                //}
-            }
-
             return false;
         }
 
