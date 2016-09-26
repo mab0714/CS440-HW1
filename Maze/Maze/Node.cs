@@ -158,7 +158,7 @@ namespace Maze
 
         private endGoalMultiple calcHvalueMultiple(int x, int y, List<Node> goalList)
         {
-            int closestDist = 0;
+            int closestDist = 10000;
             int curDist = 0;
             Node tmpGoal = new Node(0,0,null);
 
@@ -438,7 +438,7 @@ namespace Maze
                 tmpNode.g = tmpNode.parentNode.g + 1;
                 tmpNode.h = calcHvalueMultiple(this._x - 1, this._y, goalList).dist;
                 tmpNode.f = tmpNode.g + tmpNode.h;
-                tmpNode.goalStateNode = calcHvalueMultiple(this._x, this._y + 1, goalList).endGoal;
+                tmpNode.goalStateNode = calcHvalueMultiple(this._x - 1, this._y, goalList).endGoal;
                 tmpNode._numGoals = this._numGoals;
                 AddChild(tmpNode);
             }

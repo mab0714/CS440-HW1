@@ -27,7 +27,7 @@ namespace Maze
             List<Node> pathToGoalState = new List<Node>();
             List<Node> otherChildNodes = new List<Node>();
 
-            int refreshDelayMS = 300;
+            int refreshDelayMS = 500;
             bool found = false;
             //int goalNums = 0;
 
@@ -372,19 +372,8 @@ namespace Maze
                         break;
                     }
 
-                    // May need this code below if we decide to pass in list of goalStateNodes
-
-                    //if (goalStateNodes != null)
-                    //{
-                    //found = findAPathHash(currentGeneration, goalStateNodes, visitedNodesHash, pathToGoalState, otherChildNodes, refreshDelayMS, maxDepth);
-
                     found = findPathMultiple(currNums, goalList, nextOptions, goalNums, mazeBoard, visitedNodes, pathToGoalState, otherChildNodes, refreshDelayMS, tmpDepth);
                     tmpDepth++;
-                    //}
-                    //else
-                    //{
-                    //    break;
-                    //}
                 }
 
                 if (found)
@@ -424,34 +413,6 @@ namespace Maze
         }
 
 
-        /*
-        int calcManhattan12(int x, int y, List<Node> goalList)
-        {
-            int z = 0;
-            int xdelta = 0;
-            int ydelta = 0;
-
-            foreach (Node node in goalList)
-            {
-                xdelta = Math.Abs(x - node.x);
-                ydelta = Math.Abs(y - node.y);
-                z += xdelta + ydelta;
-            }
-            return z;
-        }
-        */
-
-        //    static bool findMultipleCheckAll(int currNums, List<Node> nextOptions, int goalNums, List<List<char>> mazeBoard, List<Node> visitedNodes, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS, int maxDepth)
-        //{
-        //    Node currentNode = new Node(0, 0, null, goalNums);
-        //    Node endNode = new Node(0, 0, null, goalNums);
-
-        //    while(currNums < goalNums)
-        //    {
-        //        if(currentNode.)
-        //    }
-        //}
-
         static bool findPathMultiple(int currNums, List<Node> goalList, List<Node> nextOptions, int goalNums, List<List<char>> mazeBoard, List<Node> visitedNodes, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS, int maxDepth)
         {
             Node currentNode = new Node(0, 0, null, null);
@@ -459,18 +420,35 @@ namespace Maze
             Node tmpEndGoal = new Node(0, 0, null);
             char[] path = { '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
             List<Node> sortList = new List<Node>();
+
             while (nextOptions.Count > 0)
             {
                 sortList = nextOptions.OrderBy(o => o.f).ThenBy(n => n.h).ToList();
-                Console.Write("1");
+                Console.Write("1!!!");
 
                 if (!sortList.Any())
                 {
                     return false;
                 }
+
+                Console.WriteLine("currentNode:" + sortList[0].x + sortList[0].y);
                 currentNode = sortList[0];
-                Console.WriteLine("currentNode:" + currentNode.goalStateNode.x + currentNode.goalStateNode.y);
-                Node currBestGoal = currentNode.goalStateNode;
+                // Console.WriteLine("currentNode:" + currentNode.goalStateNode.x + currentNode.goalStateNode.y);
+                int currBest = 0;
+                int bestBest = 10000;
+                Node firstBestGoal = new Node(0, 0, null);
+                foreach (Node node in goalList)
+                {
+                    currBest = Math.Abs(currentNode.x - node.x) + Math.Abs(currentNode.y - node.y);
+                    if (currBest < bestBest)
+                    {
+                        bestBest = currBest;
+                        firstBestGoal = node;
+                    }
+                }
+
+                Node currBestGoal = firstBestGoal;
+                Console.WriteLine("currBestGoal: " + currBestGoal.x + currBestGoal.y);
                 //List<Node> tempGoalList = new List<Node>();
                 //tempGoalList = goalList;
 
@@ -497,10 +475,21 @@ namespace Maze
 
                     Console.WriteLine("CurrentNode: " + currentNode.x + currentNode.y);
                     Console.WriteLine("currBestGoal: " + currBestGoal.x + currBestGoal.y);
+                    Console.ReadKey();
+
+                    // bool xxx = (goalList.Contains(currentNode) && (currNums < goalNums));
+                    //if (currentNode.Equals(currBestGoal) && (currNums < goalNums))
+                    //{
+                    //    currNums++;
+                    //    mazeBoard[currentNode.y][currentNode.x] = path[currNums-1];
+                    //}
+
+                    Console.WriteLine("currNums: " + currNums);
+                    Console.WriteLine("goalNums: " + goalNums);
                     // Check goalState
-                    if (currentNode.Equals(currBestGoal) && (currNums == goalNums))
+                    if (/*currentNode.Equals(currBestGoal) && */(currNums == goalNums))
                     {
-                        Console.Write("2");
+                        Console.Write("2!!!");
                         // I'm done.  Calculate my finalPathOfNodes by backtracking from my currentNode to the node which has no parent (root)
                         finalPathOfNodes.Clear();
                         finalPathOfNodes.Add(currentNode);
@@ -516,11 +505,12 @@ namespace Maze
                             finalPathOfNodes.Add(nextNode);
                             tmpNode = nextNode;
                             i++;
+                      
                         }
                         */
 
                         // Mark the root as 'P'
-                        mazeBoard[tmpNode.y][tmpNode.x] = 'P';
+                        // mazeBoard[tmpNode.y][tmpNode.x] = 'P';
 
                         // Show maze for a few seconds
                         Thread.Sleep(refreshDelayMS);
@@ -530,12 +520,16 @@ namespace Maze
                     }
                     else
                     {
-                        Console.Write("3");
-                        // bool xxx = (goalList.Contains(currentNode) && (currNums < goalNums));
+                        Console.Write("3!!!");
+                        //// bool xxx = (goalList.Contains(currentNode) && (currNums < goalNums));
                         if (currentNode.Equals(currBestGoal) && (currNums < goalNums))
                         {
+                            Console.WriteLine("Final currNum: " + currNums);
                             currNums++;
                             mazeBoard[currentNode.y][currentNode.x] = path[currNums];
+                            goalList.Remove(currentNode);
+                            Console.WriteLine("Final currNum: " + currNums);
+                            Console.ReadKey();
                         }
 
                         // Not done, need to do work.
@@ -607,10 +601,6 @@ namespace Maze
 
                             nextOptions.Add(n);
                         }
-
-                        //return false;
-                        //findGreedyPath(nextOptions, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
-
                     }
                 }
 
@@ -621,16 +611,6 @@ namespace Maze
                     // don't return to get out of routine.  Move on to next available from our sortedList (Frontier)
                     sortList.Remove(currentNode);  // don't want to keep checking this in a loop.  Needs to be removed from sortList for next iteration.
                     nextOptions.Remove(currentNode);  // may not be needed as this section is primarily for moving on to other siblings within this depth.  nextOptions has no impact here.
-
-                    //if (nextOptions != null)
-                    //{
-                    //    sortList = nextOptions.OrderBy(o => o.f).ToList();
-                    //    findGreedyPath(sortList, goalStateNode, mazeBoard, visitedNodes, finalPathOfNodes, otherChildNodes, refreshDelayMS);
-                    //}
-                    //else
-                    //{
-                    //    return false;
-                    //}
                 }
             }
             return false;
