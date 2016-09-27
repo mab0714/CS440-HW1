@@ -818,7 +818,16 @@ namespace Rubiks
         static bool findAPathHash(List<Node> nextOptions, Node goalStateNode, ConcurrentDictionary<int, List<Node>> visitedNodesDict, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS, int cost, Dictionary<String, int> patternDB, int valueDivideHeuristic, int maxDepth, out bool maxDepthHit)
         //static bool findAPathHash(List<Node> nextOptions, List<Node> goalStateNodes, Dictionary<int, List<Node>> visitedNodesDict, List<Node> finalPathOfNodes, List<Node> otherChildNodes, int refreshDelayMS, int maxDepth)
         {
-            Node currentNode = new Node(nextOptions[0].myState, null);
+            Node currentNode;
+            try
+            {
+                currentNode = new Node(nextOptions[0].myState, null);
+            }
+            catch
+            {
+                maxDepthHit = true;
+                return false;
+            }
             //Node nextNode = new Node(goalStateNodes[0].myState, null);
             Node nextNode = new Node(goalStateNode.myState, null);
             List<Node> sortList;
